@@ -1,5 +1,6 @@
 # src/services/recommendation_service.py
 
+
 class Rec_strategy():
     def __init__(self):
         pass    
