@@ -1,4 +1,4 @@
 llm:
   api_type: 'zhipuai'
-  api_key: ''
+  api_key: "ZHIPUAI_API_KEY"
   model: 'glm-4-flash'
