@@ -1,12 +1,18 @@
 from src.services import RecommendationSystem
+from src.services import create_interface
 from src.data_processing import WebCrawler
 import sqlite3
 
 
 if __name__ == "__main__":
-    # # 假设这是RecommendationSystem类的实例
-    rec_system = RecommendationSystem()
-    rec_system.run()
+    interface = create_interface()
+    interface.launch()
+
+
+# if __name__ == "__main__":
+#     # # 假设这是RecommendationSystem类的实例
+#     rec_system = RecommendationSystem()
+#     rec_system.run()
         
     # # # 注册并登录测试用户
     # rec_system.register("test_user", "password123")
