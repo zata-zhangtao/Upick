@@ -5,6 +5,60 @@ from urllib.parse import urlparse
 from bs4 import BeautifulSoup  # 添加BeautifulSoup来清理HTML
 import datetime
 
+
+# region 爬虫函数，传入url，返回内容
+def fetch_and_clean_content(url):
+    try:
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8'
+        }
+        
+        response = requests.get(url, headers=headers)
+        if response.status_code != 200:
+            return f"Failed to retrieve the page. Status code: {response.status_code}"
+
+        # 自动检测编码
+        response.encoding = response.apparent_encoding
+        raw_html = response.text
+
+        soup = BeautifulSoup(raw_html, 'html.parser')
+        for style_tag in soup.find_all('style'):
+            style_tag.extract()
+        for script_tag in soup.find_all('script'):
+            script_tag.extract()
+        for tag in soup.find_all():
+            if 'style' in tag.attrs:
+                del tag['style']
+
+        clean_text = soup.get_text(separator='\n').strip()
+        lines = [line.strip() for line in clean_text.splitlines() if line.strip()]
+        clean_text = '\n'.join(lines)
+
+        return clean_text
+
+    except Exception as e:
+        return False
+
+# endregion
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 class WebCrawler:
     def __init__(self, username, db_path=r'data\recommendation_system.db'):
         """初始化爬虫类"""
@@ -62,18 +116,18 @@ class WebCrawler:
             clean_content = self.clean_content(raw_content)
             
             # 生成对比文件
-            with open('content_comparison.txt', 'w', encoding='utf-8') as f:
-                f.write("=== 原始内容 (前1000字符) ===\n")
-                f.write(raw_content[:10000] + "\n\n")
-                f.write("=== 清理后内容 (前1000字符) ===\n")
-                f.write(clean_content[:10000] + "\n")
+            # with open('content_comparison.txt', 'w', encoding='utf-8') as f:
+            #     f.write("=== 原始内容 (前1000字符) ===\n")
+            #     f.write(raw_content[:10000] + "\n\n")
+            #     f.write("=== 清理后内容 (前1000字符) ===\n")
+            #     f.write(clean_content[:10000] + "\n")
             
-            print("已生成对比文件：content_comparison.txt")
-            return raw_content, clean_content
+            # print("已生成对比文件：content_comparison.txt")
+            return clean_content
             
         except requests.exceptions.RequestException as e:
             print(f"爬取 {url} 失败: {str(e)}")
-            return None, None
+            return  None
 
     def save_to_db(self, subscription_id, url, content, clean_content):
         """将爬取的内容保存到数据库"""
