@@ -3,6 +3,7 @@
 from fastapi import FastAPI, HTTPException, Query
 from typing import List
 from src.services.recommendation_service import RecommendationService
+from src.services.zodiac_api import include_zodiac_router
 from src.utils.logger import get_logger
 
 # 初始化日志记录器
@@ -17,6 +18,9 @@ app = FastAPI(
 
 # 初始化推荐服务
 recommendation_service = RecommendationService()
+
+# 包含星座运势API路由
+include_zodiac_router(app)
 
 @app.get("/health", tags=["Health Check"])
 async def health_check():
