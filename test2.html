@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>字典学习介绍</title>
+    <style>
+        body {
+            font-family: 'Microsoft YaHei', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+        }
+        .slide {
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 20px;
+            box-sizing: border-box;
+            background-color: white;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .title {
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            color: #2c3e50;
+        }
+        .subtitle {
+            font-size: 1.8em;
+            margin-bottom: 15px;
+            color: #3498db;
+        }
+        .content {
+            font-size: 1.3em;
+            max-width: 800px;
+            line-height: 1.6;
+        }
+        .formula {
+            font-family: 'Times New Roman', serif;
+            font-style: italic;
+            margin: 20px 0;
+            font-size: 1.4em;
+        }
+        .image-placeholder {
+            width: 500px;
+            height: 300px;
+            background-color: #ecf0f1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 20px 0;
+            border: 1px dashed #bdc3c7;
+        }
+        .footer {
+            position: fixed;
+            bottom: 10px;
+            right: 20px;
+            font-size: 0.8em;
+            color: #7f8c8d;
+        }
+        .navigation {
+            position: fixed;
+            bottom: 20px;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div id="slide1" class="slide">
+        <h1 class="title">字典学习</h1>
+        <h2 class="subtitle">Dictionary Learning</h2>
+        <p class="content">一种强大的信号表示与处理方法</p>
+    </div>
+
+    <div id="slide2" class="slide hidden">
+        <h2 class="title">什么是字典学习？</h2>
+        <div class="content">
+            <p>字典学习是一种机器学习方法，旨在找到一组基向量（称为字典），使得输入信号或数据可以被这些基向量的线性组合稀疏地表示。</p>
+            <p>简单来说，它试图找到数据的"构建块"，使得每个数据样本只需要少量这些构建块就能被重构。</p>
+        </div>
+    </div>
+
+    <div id="slide3" class="slide hidden">
+        <h2 class="title">字典学习的数学表示</h2>
+        <div class="content">
+            <p>给定训练样本 X = [x₁, x₂, ..., xₙ]，字典学习的目标是找到字典 D 和稀疏编码 α，使得：</p>
+            <div class="formula">
+                min ||X - Dα||² + λ||α||₁
+            </div>
+            <p>其中：</p>
+            <ul style="text-align: left;">
+                <li>D 是字典矩阵，包含基向量（原子）</li>
+                <li>α 是稀疏系数矩阵</li>
+                <li>λ 是控制稀疏性的正则化参数</li>
+                <li>||·||₁ 是 L1 范数，用于促进稀疏性</li>
+            </ul>
+        </div>
+    </div>
+
+    <div id="slide4" class="slide hidden">
+        <h2 class="title">字典学习的两个主要步骤</h2>
+        <div class="content">
+            <h3 class="subtitle">1. 稀疏编码</h3>
+            <p>固定字典 D，求解稀疏系数 α：</p>
+            <div class="formula">
+                min ||X - Dα||² + λ||α||₁
+            </div>
+            
+            <h3 class="subtitle">2. 字典更新</h3>
+            <p>固定稀疏系数 α，更新字典 D：</p>
+            <div class="formula">
+                min ||X - Dα||²
+            </div>
+        </div>
+    </div>
+
+    <div id="slide5" class="slide hidden">
+        <h2 class="title">常见的字典学习算法</h2>
+        <div class="content">
+            <ul style="text-align: left;">
+                <li><strong>K-SVD</strong>：通过奇异值分解迭代更新字典和稀疏编码</li>
+                <li><strong>MOD (Method of Optimal Directions)</strong>：交替优化字典和稀疏表示</li>
+                <li><strong>Online Dictionary Learning</strong>：适用于大规模数据集的在线学习方法</li>
+                <li><strong>LASSO (Least Absolute Shrinkage and Selection Operator)</strong>：用于稀疏编码阶段</li>
+                <li><strong>Matching Pursuit</strong>：贪婪算法，用于稀疏编码</li>
+            </ul>
+        </div>
+    </div>
+
+    <div id="slide6" class="slide hidden">
+        <h2 class="title">字典学习的应用</h2>
+        <div class="content">
+            <ul style="text-align: left;">
+                <li><strong>图像处理</strong>：去噪、超分辨率、压缩、修复</li>
+                <li><strong>计算机视觉</strong>：特征提取、分类、人脸识别</li>
+                <li><strong>音频处理</strong>：音频去噪、音源分离</li>
+                <li><strong>医学图像分析</strong>：MRI 重建、疾病诊断</li>
+                <li><strong>自然语言处理</strong>：文本分类、主题建模</li>
+            </ul>
+            <div class="image-placeholder">图像处理应用示例图</div>
+        </div>
+    </div>
+
+    <div id="slide7" class="slide hidden">
+        <h2 class="title">字典学习的优势</h2>
+        <div class="content">
+            <ul style="text-align: left;">
+                <li><strong>适应性</strong>：字典可以适应特定数据的特征</li>
+                <li><strong>稀疏表示</strong>：提供数据的紧凑表示</li>
+                <li><strong>灵活性</strong>：可以处理各种类型的数据</li>
+                <li><strong>可解释性</strong>：学习到的字典元素通常具有物理意义</li>
+                <li><strong>泛化能力</strong>：对未见过的数据有良好的表示能力</li>
+            </ul>
+        </div>
+    </div>
+
+    <div id="slide8" class="slide hidden">
+        <h2 class="title">字典学习与其他方法的比较</h2>
+        <div class="content">
+            <table border="1" style="width: 100%; border-collapse: collapse;">
+                <tr>
+                    <th>方法</th>
+                    <th>优势</th>
+                    <th>劣势</th>
+                </tr>
+                <tr>
+                    <td>字典学习</td>
+                    <td>适应性强，稀疏表示</td>
+                    <td>计算复杂度高</td>
+                </tr>
+                <tr>
+                    <td>主成分分析 (PCA)</td>
+                    <td>计算简单，正交基</td>
+                    <td>线性，不适合复杂数据</td>
+                </tr>
+                <tr>
+                    <td>小波变换</td>
+                    <td>多分辨率分析</td>
+                    <td>固定基，不适应数据</td>
+                </tr>
+                <tr>
+                    <td>深度学习</td>
+                    <td>强大的表示能力</td>
+                    <td>需要大量数据，黑盒模型</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+    <div id="slide9" class="slide hidden">
+        <h2 class="title">字典学习的挑战</h2>
+        <div class="content">
+            <ul style="text-align: left;">
+                <li><strong>计算复杂度</strong>：特别是对大规模数据集</li>
+                <li><strong>参数选择</strong>：字典大小、稀疏度等参数的选择</li>
+                <li><strong>非凸优化</strong>：求解过程可能陷入局部最优</li>
+                <li><strong>可扩展性</strong>：处理高维数据的挑战</li>
+                <li><strong>理论保证</strong>：对恢复性能的理论分析仍在发展中</li>
+            </ul>
+        </div>
+    </div>
+
+    <div id="slide10" class="slide hidden">
+        <h2 class="title">未来发展方向</h2>
+        <div class="content">
+            <ul style="text-align: left;">
+                <li><strong>结构化字典学习</strong>：利用数据的结构信息</li>
+                <li><strong>多模态字典学习</strong>：结合不同类型的数据</li>
+                <li><strong>深度字典学习</strong>：结合深度学习的优势</li>
+                <li><strong>分布式字典学习</strong>：处理大规模数据</li>
+                <li><strong>动态字典学习</strong>：适应时变数据</li>
+            </ul>
+        </div>
+    </div>
+
+    <div id="slide11" class="slide hidden">
+        <h2 class="title">总结</h2>
+        <div class="content">
+            <p>字典学习是一种强大的信号表示方法，通过学习适应数据的字典和稀疏表示，为各种应用提供了有效的解决方案。</p>
+            <p>主要优势：</p>
+            <ul style="text-align: left;">
+                <li>适应性强的数据表示</li>
+                <li>稀疏性带来的高效性</li>
+                <li>广泛的应用领域</li>
+            </ul>
+            <p>尽管面临计算复杂度等挑战，字典学习仍然是信号处理和机器学习中的重要研究方向。</p>
+        </div>
+    </div>
+
+    <div id="slide12" class="slide hidden">
+        <h2 class="title">参考资料</h2>
+        <div class="content">
+            <ul style="text-align: left;">
+                <li>Elad, M. (2010). Sparse and Redundant Representations: From Theory to Applications in Signal and Image Processing.</li>
+                <li>Mairal, J., Bach, F., Ponce, J., & Sapiro, G. (2010). Online learning for matrix factorization and sparse coding.</li>
+                <li>Aharon, M., Elad, M., & Bruckstein, A. (2006). K-SVD: An algorithm for designing overcomplete dictionaries for sparse representation.</li>
+                <li>Rubinstein, R., Bruckstein, A. M., & Elad, M. (2010). Dictionaries for sparse representation modeling.</li>
+            </ul>
+        </div>
+    </div>
+
+    <div id="slide13" class="slide hidden">
+        <h2 class="title">谢谢观看</h2>
+        <div class="content">
+            <p style="font-size: 1.8em;">有问题欢迎讨论</p>
+        </div>
+    </div>
+
+    <div class="navigation">
+        <button id="prevBtn">上一页</button>
+        <button id="nextBtn">下一页</button>
+    </div>
+
+    <div class="footer">字典学习介绍 | <span id="currentSlide">1</span>/13</div>
+
+    <script>
+        let currentSlideIndex = 1;
+        const totalSlides = 13;
+
+        function showSlide(index) {
+            // Hide all slides
+            for (let i = 1; i <= totalSlides; i++) {
+                document.getElementById(`slide${i}`).classList.add('hidden');
+            }
+            
+            // Show the current slide
+            document.getElementById(`slide${index}`).classList.remove('hidden');
+            
+            // Update slide counter
+            document.getElementById('currentSlide').textContent = index;
+            
+            // Update button states
+            document.getElementById('prevBtn').disabled = (index === 1);
+            document.getElementById('nextBtn').disabled = (index === totalSlides);
+        }
+
+        document.getElementById('prevBtn').addEventListener('click', () => {
+            if (currentSlideIndex > 1) {
+                currentSlideIndex--;
+                showSlide(currentSlideIndex);
+            }
+        });
+
+        document.getElementById('nextBtn').addEventListener('click', () => {
+            if (currentSlideIndex < totalSlides) {
+                currentSlideIndex++;
+                showSlide(currentSlideIndex);
+            }
+        });
+
+        // Handle keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === ' ') {
+                if (currentSlideIndex < totalSlides) {
+                    currentSlideIndex++;
+                    showSlide(currentSlideIndex);
+                }
+            } else if (e.key === 'ArrowLeft') {
+                if (currentSlideIndex > 1) {
+                    currentSlideIndex--;
+                    showSlide(currentSlideIndex);
+                }
+            }
+        });
+
+        // Initialize
+        showSlide(currentSlideIndex);
+    </script>
+</body>
+</html>

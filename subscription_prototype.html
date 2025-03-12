@@ -1,0 +1,1903 @@
+我将为您设计一个自定义订阅系统的原型图，这个系统将比市面上现有的订阅系统有一些创新和优势。以下是HTML代码，包含了所有页面的原型图设计：
+
+```html
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>自定义订阅系统原型图</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        
+        h1, h2, h3 {
+            color: #2c3e50;
+        }
+        
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #3498db;
+        }
+        
+        .prototype-container {
+            display: flex;
+            flex-direction: column;
+            gap: 50px;
+            margin-bottom: 50px;
+        }
+        
+        .prototype {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            position: relative;
+        }
+        
+        .prototype-title {
+            background-color: #3498db;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 5px;
+            display: inline-block;
+            margin-bottom: 20px;
+        }
+        
+        .screen {
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            background-color: #fafafa;
+        }
+        
+        .header {
+            background-color: #2c3e50;
+            color: white;
+            padding: 15px;
+            border-radius: 5px 5px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .content {
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-top: none;
+            border-radius: 0 0 5px 5px;
+            background-color: white;
+        }
+        
+        .nav {
+            display: flex;
+            background-color: #34495e;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+        }
+        
+        .nav-item {
+            color: white;
+            padding: 8px 15px;
+            margin-right: 5px;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        
+        .nav-item.active {
+            background-color: #3498db;
+        }
+        
+        .card {
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 15px;
+            background-color: white;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+        
+        .subscription-card {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 15px;
+            background-color: white;
+            transition: transform 0.2s;
+        }
+        
+        .subscription-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .subscription-info {
+            flex: 1;
+        }
+        
+        .subscription-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .btn {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        
+        .btn-primary {
+            background-color: #3498db;
+            color: white;
+        }
+        
+        .btn-secondary {
+            background-color: #95a5a6;
+            color: white;
+        }
+        
+        .btn-success {
+            background-color: #2ecc71;
+            color: white;
+        }
+        
+        .btn-danger {
+            background-color: #e74c3c;
+            color: white;
+        }
+        
+        .search-bar {
+            display: flex;
+            margin-bottom: 20px;
+        }
+        
+        .search-input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px 0 0 4px;
+            font-size: 16px;
+        }
+        
+        .search-btn {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 0 4px 4px 0;
+            cursor: pointer;
+        }
+        
+        .filter-section {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .filter-tag {
+            background-color: #ecf0f1;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        
+        .filter-tag.active {
+            background-color: #3498db;
+            color: white;
+        }
+        
+        .recommendation-card {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+            background-color: white;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .recommendation-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .recommendation-title {
+            font-weight: bold;
+            font-size: 18px;
+        }
+        
+        .recommendation-price {
+            color: #e74c3c;
+            font-weight: bold;
+        }
+        
+        .recommendation-content {
+            margin-bottom: 15px;
+        }
+        
+        .recommendation-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .recommendation-tags {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .recommendation-tag {
+            background-color: #ecf0f1;
+            padding: 3px 8px;
+            border-radius: 10px;
+            font-size: 12px;
+        }
+        
+        .bundle-card {
+            border: 2px solid #3498db;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+            background-color: #f8f9fa;
+        }
+        
+        .bundle-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .bundle-title {
+            font-weight: bold;
+            font-size: 20px;
+            color: #2c3e50;
+        }
+        
+        .bundle-savings {
+            background-color: #2ecc71;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-weight: bold;
+        }
+        
+        .bundle-items {
+            margin-bottom: 15px;
+        }
+        
+        .bundle-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px dashed #ddd;
+        }
+        
+        .bundle-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 15px;
+        }
+        
+        .bundle-price {
+            font-size: 18px;
+            font-weight: bold;
+        }
+        
+        .usage-chart {
+            height: 200px;
+            background-color: #ecf0f1;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #7f8c8d;
+        }
+        
+        .spending-summary {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .summary-card {
+            flex: 1;
+            background-color: white;
+            border-radius: 5px;
+            padding: 15px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+        
+        .summary-title {
+            color: #7f8c8d;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+        
+        .summary-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        
+        .summary-change {
+            font-size: 14px;
+            color: #2ecc71;
+        }
+        
+        .summary-change.negative {
+            color: #e74c3c;
+        }
+        
+        .timeline {
+            margin-top: 20px;
+            position: relative;
+            padding-left: 30px;
+        }
+        
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 10px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background-color: #3498db;
+        }
+        
+        .timeline-item {
+            position: relative;
+            margin-bottom: 20px;
+        }
+        
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -30px;
+            top: 5px;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background-color: #3498db;
+        }
+        
+        .timeline-date {
+            font-size: 14px;
+            color: #7f8c8d;
+            margin-bottom: 5px;
+        }
+        
+        .timeline-content {
+            background-color: white;
+            border-radius: 5px;
+            padding: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+        
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid #ddd;
+            margin-bottom: 20px;
+        }
+        
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+        }
+        
+        .tab.active {
+            border-bottom: 3px solid #3498db;
+            font-weight: bold;
+            color: #3498db;
+        }
+        
+        .notification {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: #2ecc71;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            animation: fadeOut 5s forwards;
+        }
+        
+        @keyframes fadeOut {
+            0% { opacity: 1; }
+            70% { opacity: 1; }
+            100% { opacity: 0; }
+        }
+        
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal {
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            width: 80%;
+            max-width: 500px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .modal-title {
+            font-size: 20px;
+            font-weight: bold;
+        }
+        
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+        }
+        
+        .modal-body {
+            margin-bottom: 20px;
+        }
+        
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        
+        .ai-suggestion {
+            background-color: #e8f4fc;
+            border-left: 4px solid #3498db;
+            padding: 10px 15px;
+            margin-bottom: 15px;
+            border-radius: 0 5px 5px 0;
+        }
+        
+        .ai-suggestion-title {
+            font-weight: bold;
+            color: #2980b9;
+            margin-bottom: 5px;
+        }
+        
+        .progress-container {
+            width: 100%;
+            height: 8px;
+            background-color: #ecf0f1;
+            border-radius: 4px;
+            margin-bottom: 5px;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            background-color: #3498db;
+            border-radius: 4px;
+        }
+        
+        .progress-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #7f8c8d;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 10px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .badge-primary {
+            background-color: #3498db;
+            color: white;
+        }
+        
+        .badge-success {
+            background-color: #2ecc71;
+            color: white;
+        }
+        
+        .badge-warning {
+            background-color: #f39c12;
+            color: white;
+        }
+        
+        .badge-danger {
+            background-color: #e74c3c;
+            color: white;
+        }
+        
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        
+        .comparison-table th,
+        .comparison-table td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+        
+        .comparison-table th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+        
+        .comparison-table tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        
+        .feature-available {
+            color: #2ecc71;
+            font-weight: bold;
+        }
+        
+        .feature-unavailable {
+            color: #e74c3c;
+        }
+        
+        .description {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+            border-left: 4px solid #3498db;
+        }
+    </style>
+</head>
+<body>
+    <h1>自定义订阅系统原型图</h1>
+    
+    <div class="prototype-container">
+        <!-- 登录/注册页面 -->
+        <div class="prototype">
+            <div class="prototype-title">登录/注册页面</div>
+            <div class="screen">
+                <div class="content" style="text-align: center; padding: 40px 20px;">
+                    <h2 style="margin-bottom: 30px;">SubScribe+</h2>
+                    <p style="margin-bottom: 30px; color: #7f8c8d;">智能订阅管理，为您节省每一分钱</p>
+                    
+                    <div style="max-width: 400px; margin: 0 auto;">
+                        <div class="tabs">
+                            <div class="tab active">登录</div>
+                            <div class="tab">注册</div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <input type="email" class="form-input" placeholder="电子邮箱">
+                        </div>
+                        <div class="form-group">
+                            <input type="password" class="form-input" placeholder="密码">
+                        </div>
+                        <div style="text-align: right; margin-bottom: 20px;">
+                            <a href="#" style="color: #3498db; text-decoration: none; font-size: 14px;">忘记密码？</a>
+                        </div>
+                        <button class="btn btn-primary" style="width: 100%;">登录</button>
+                        
+                        <div style="margin-top: 30px;">
+                            <p style="color: #7f8c8d; margin-bottom: 15px;">或通过以下方式登录</p>
+                            <div style="display: flex; justify-content: center; gap: 20px;">
+                                <div style="width: 40px; height: 40px; background-color: #ecf0f1; border-radius: 50%; display: flex; align-items: center; justify-content: center;">W</div>
+                                <div style="width: 40px; height: 40px; background-color: #ecf0f1; border-radius: 50%; display: flex; align-items: center; justify-content: center;">G</div>
+                                <div style="width: 40px; height: 40px; background-color: #ecf0f1; border-radius: 50%; display: flex; align-items: center; justify-content: center;">F</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="description">
+                <p><strong>页面说明：</strong></p>
+                <p>登录/注册页面采用简洁的设计，突出品牌名称"SubScribe+"和核心价值主张。用户可以通过邮箱密码登录，也可以选择第三方账号登录（微信、Google、Facebook等）。页面顶部的标签可以在登录和注册之间切换。</p>
+            </div>
+        </div>
+        
+        <!-- 仪表盘/概览页面 -->
+        <div class="prototype">
+            <div class="prototype-title">仪表盘/概览页面</div>
+            <div class="screen">
+                <div class="header">
+                    <div>SubScribe+</div>
+                    <div style="display: flex; align-items: center; gap: 15px;">
+                        <div style="position: relative;">
+                            <span>🔔</span>
+                            <span style="position: absolute; top: -5px; right: -5px; background-color: #e74c3c; color: white; border-radius: 50%; width: 16px; height: 16px; font-size: 12px; display: flex; align-items: center; justify-content: center;">3</span>
+                        </div>
+                        <div>张三</div>
+                    </div>
+                </div>
+                
+                <div class="nav">
+                    <div class="nav-item active">概览</div>
+                    <div class="nav-item">我的订阅</div>
+                    <div class="nav-item">发现</div>
+                    <div class="nav-item">智能推荐</div>
+                    <div class="nav-item">设置</div>
+                </div>
+                
+                <div class="content">
+                    <h2>欢迎回来，张三</h2>
+                    <p style="color: #7f8c8d; margin-bottom: 20px;">这是您的订阅概览</p>
+                    
+                    <div class="spending-summary">
+                        <div class="summary-card">
+                            <div class="summary-title">本月支出</div>
+                            <div class="summary-value">¥298.50</div>
+                            <div class="summary-change">较上月 -¥42.00</div>
+                        </div>
+                        <div class="summary-card">
+                            <div class="summary-title">活跃订阅</div>
+                            <div class="summary-value">8</div>
+                            <div class="summary-change">较上月 +1</div>
+                        </div>
+                        <div class="summary-card">
+                            <div class="summary-title">即将到期</div>
+                            <div class="summary-value">2</div>
+                            <div class="summary-change">7天内</div>
+                        </div>
+                    </div>
+                    
+                    <div class="usage-chart">
+                        [订阅支出趋势图表]
+                    </div>
+                    
+                    <div class="ai-suggestion">
+                        <div class="ai-suggestion-title">💡 智能建议</div>
+                        <p>您的Netflix和Disney+订阅有重叠内容，考虑暂停其中一个可每月节省¥45。</p>
+                        <button class="btn btn-primary" style="margin-top: 10px;">查看详情</button>
+                    </div>
+                    
+                    <h3>即将扣款</h3>
+                    <div class="card">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <div style="font-weight: bold;">Spotify Premium</div>
+                                <div style="color: #7f8c8d;">¥18.00 · 3天后扣款</div>
+                            </div>
+                            <button class="btn btn-secondary">管理</button>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <div style="font-weight: bold;">iCloud+ 200GB</div>
+                                <div style="color: #7f8c8d;">¥21.00 · 5天后扣款</div>
+                            </div>
+                            <button class="btn btn-secondary">管理</button>
+                        </div>
+                    </div>
+                    
+                    <h3>最近活动</h3>
+                    <div class="timeline">
+                        <div class="timeline-item">
+                            <div class="timeline-date">今天 14:30</div>
+                            <div class="timeline-content">
+                                <p>Netflix订阅已自动续费 <span style="color: #e74c3c; font-weight: bold;">-¥89.00</span></p>
+                            </div>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="timeline-date">昨天 09:15</div>
+                            <div class="timeline-content">
+                                <p>您接受了取消Xbox Game Pass订阅，将在本月底到期</p>
+                            </div>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="timeline-date">2023-06-10 18:45</div>
+                            <div class="timeline-content">
+                                <p>新增订阅：Notion Pro <span style="color: #e74c3c; font-weight: bold;">-¥68.00/月</span></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="description">
+                <p><strong>页面说明：</strong></p>
+                <p>仪表盘/概览页面是用户登录后的首页，提供订阅管理的核心信息：</p>
+                <ul>
+                    <li>顶部显示用户名和通知</li>
+                    <li>支出摘要卡片展示本月总支出、活跃订阅数量和即将到期的订阅</li>
+                    <li>支出趋势图表直观展示订阅费用变化</li>
+                    <li>AI智能建议区域提供个性化的省钱建议</li>
+                    <li>即将扣款区域提醒用户近期将要支付的订阅费用</li>
+                    <li>最近活动时间线记录用户的订阅相关操作</li>
+                </ul>
+            </div>
+        </div>
+        
+        <!-- 我的订阅页面 -->
+        <div class="prototype">
+            <div class="prototype-title">我的订阅页面</div>
+            <div class="screen">
+                <div class="header">
+                    <div>SubScribe+</div>
+                    <div style="display: flex; align-items: center; gap: 15px;">
+                        <div style="position: relative;">
+                            <span>🔔</span>
+                            <span style="position: absolute; top: -5px; right: -5px; background-color: #e74c3c; color: white; border-radius: 50%; width: 16px; height: 16px; font-size: 12px; display: flex; align-items: center; justify-content: center;">3</span>
+                        </div>
+                        <div>张三</div>
+                    </div>
+                </div>
+                
+                <div class="nav">
+                    <div class="nav-item">概览</div>
+                    <div class="nav-item active">我的订阅</div>
+                    <div class="nav-item">发现</div>
+                    <div class="nav-item">智能推荐</div>
+                    <div class="nav-item">设置</div>
+                </div>
+                
+                <div class="content">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <h2>我的订阅</h2>
+                        <button class="btn btn-primary">+ 添加订阅</button>
+                    </div>
+                    
+                    <div class="search-bar">
+                        <input type="text" class="search-input" placeholder="搜索订阅...">
+                        <button class="search-btn">搜索</button>
+                    </div>
+                    
+                    <div class="filter-section">
+                        <div class="filter-tag active">全部</div>
+                        <div class="filter-tag">娱乐</div>
+                        <div class="filter-tag">工作</div>
+                        <div class="filter-tag">学习</div>
+                        <div class="filter-tag">生活</div>
+                        <div class="filter-tag">其他</div>
+                    </div>
+                    
+                    <div class="tabs">
+                        <div class="tab active">活跃订阅</div>
+                        <div class="tab">已暂停</div>
+                        <div class="tab">已取消</div>
+                    </div>
+                    
+                    <div class="subscription-card">
+                        <div class="subscription-info">
+                            <div style="font-weight: bold; font-size: 18px;">Netflix</div>
+                            <div style="color: #7f8c8d;">标准套餐 · ¥89.00/月</div>
+                            <div style="margin-top: 5px;">
+                                <span class="badge badge-primary">娱乐</span>
+                                <span style="font-size: 14px; color: #7f8c8d; margin-left: 10px;">下次扣款: 2023-07-15</span>
+                            </div>
+                        </div>
+                        <div class="subscription-actions">
+                            <button class="btn btn-secondary">暂停</button>
+                            <button class="btn btn-danger">取消</button>
+                        </div>
+                    </div>
+                    
+                    <div class="subscription-card">
+                        <div class="subscription-info">
+                            <div style="font-weight: bold; font-size: 18px;">Spotify Premium</div>
+                            <div style="color: #7f8c8d;">个人套餐 · ¥18.00/月</div>
+                            <div style="margin-top: 5px;">
+                                <span class="badge badge-primary">娱乐</span>
+                                <span style="font-size: 14px; color: #7f8c8d; margin-left: 10px;">下次扣款: 
+                                    我将继续提供自定义订阅系统原型图的HTML代码：
+
+                                    ```html
+                                                                    <span style="font-size: 14px; color: #7f8c8d; margin-left: 10px;">下次扣款: 2023-06-18</span>
+                                                                </div>
+                                                            </div>
+                                                            <div class="subscription-actions">
+                                                                <button class="btn btn-secondary">暂停</button>
+                                                                <button class="btn btn-danger">取消</button>
+                                                            </div>
+                                                        </div>
+                                                        
+                                                        <div class="subscription-card">
+                                                            <div class="subscription-info">
+                                                                <div style="font-weight: bold; font-size: 18px;">iCloud+</div>
+                                                                <div style="color: #7f8c8d;">200GB存储 · ¥21.00/月</div>
+                                                                <div style="margin-top: 5px;">
+                                                                    <span class="badge badge-warning">工作</span>
+                                                                    <span style="font-size: 14px; color: #7f8c8d; margin-left: 10px;">下次扣款: 2023-06-20</span>
+                                                                </div>
+                                                            </div>
+                                                            <div class="subscription-actions">
+                                                                <button class="btn btn-secondary">暂停</button>
+                                                                <button class="btn btn-danger">取消</button>
+                                                            </div>
+                                                        </div>
+                                                        
+                                                        <div class="subscription-card">
+                                                            <div class="subscription-info">
+                                                                <div style="font-weight: bold; font-size: 18px;">Notion Pro</div>
+                                                                <div style="color: #7f8c8d;">专业版 · ¥68.00/月</div>
+                                                                <div style="margin-top: 5px;">
+                                                                    <span class="badge badge-warning">工作</span>
+                                                                    <span style="font-size: 14px; color: #7f8c8d; margin-left: 10px;">下次扣款: 2023-07-10</span>
+                                                                </div>
+                                                            </div>
+                                                            <div class="subscription-actions">
+                                                                <button class="btn btn-secondary">暂停</button>
+                                                                <button class="btn btn-danger">取消</button>
+                                                            </div>
+                                                        </div>
+                                                        
+                                                        <div class="subscription-card">
+                                                            <div class="subscription-info">
+                                                                <div style="font-weight: bold; font-size: 18px;">Disney+</div>
+                                                                <div style="color: #7f8c8d;">标准套餐 · ¥59.00/月</div>
+                                                                <div style="margin-top: 5px;">
+                                                                    <span class="badge badge-primary">娱乐</span>
+                                                                    <span style="font-size: 14px; color: #7f8c8d; margin-left: 10px;">下次扣款: 2023-06-25</span>
+                                                                </div>
+                                                            </div>
+                                                            <div class="subscription-actions">
+                                                                <button class="btn btn-secondary">暂停</button>
+                                                                <button class="btn btn-danger">取消</button>
+                                                            </div>
+                                                        </div>
+                                                        
+                                                        <div class="ai-suggestion">
+                                                            <div class="ai-suggestion-title">💡 智能建议</div>
+                                                            <p>您的Netflix和Disney+有87%的内容重叠，建议考虑轮换使用这两个服务，每年可节省约¥708。</p>
+                                                            <button class="btn btn-primary" style="margin-top: 10px;">查看详细分析</button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div class="description">
+                                                    <p><strong>页面说明：</strong></p>
+                                                    <p>我的订阅页面提供用户所有订阅的详细列表和管理功能：</p>
+                                                    <ul>
+                                                        <li>顶部提供添加新订阅的按钮和搜索功能</li>
+                                                        <li>分类标签可以按照不同类别筛选订阅</li>
+                                                        <li>状态标签可以查看活跃、暂停或已取消的订阅</li>
+                                                        <li>每个订阅卡片显示名称、价格、类别和下次扣款日期</li>
+                                                        <li>提供暂停和取消按钮进行快速操作</li>
+                                                        <li>底部的智能建议区域提供基于用户订阅情况的个性化省钱建议</li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                            
+                                            <!-- 订阅详情页面 -->
+                                            <div class="prototype">
+                                                <div class="prototype-title">订阅详情页面</div>
+                                                <div class="screen">
+                                                    <div class="header">
+                                                        <div>SubScribe+</div>
+                                                        <div style="display: flex; align-items: center; gap: 15px;">
+                                                            <div style="position: relative;">
+                                                                <span>🔔</span>
+                                                                <span style="position: absolute; top: -5px; right: -5px; background-color: #e74c3c; color: white; border-radius: 50%; width: 16px; height: 16px; font-size: 12px; display: flex; align-items: center; justify-content: center;">3</span>
+                                                            </div>
+                                                            <div>张三</div>
+                                                        </div>
+                                                    </div>
+                                                    
+                                                    <div class="nav">
+                                                        <div class="nav-item">概览</div>
+                                                        <div class="nav-item active">我的订阅</div>
+                                                        <div class="nav-item">发现</div>
+                                                        <div class="nav-item">智能推荐</div>
+                                                        <div class="nav-item">设置</div>
+                                                    </div>
+                                                    
+                                                    <div class="content">
+                                                        <div style="margin-bottom: 20px;">
+                                                            <a href="#" style="color: #3498db; text-decoration: none;">← 返回我的订阅</a>
+                                                        </div>
+                                                        
+                                                        <div style="display: flex; align-items: center; margin-bottom: 20px;">
+                                                            <div style="width: 60px; height: 60px; background-color: #e74c3c; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; margin-right: 15px;">N</div>
+                                                            <div>
+                                                                <h2 style="margin: 0;">Netflix</h2>
+                                                                <div style="color: #7f8c8d;">标准套餐</div>
+                                                            </div>
+                                                        </div>
+                                                        
+                                                        <div class="card" style="margin-bottom: 30px;">
+                                                            <div style="display: flex; justify-content: space-between; margin-bottom: 15px;">
+                                                                <div>
+                                                                    <div style="font-weight: bold;">订阅状态</div>
+                                                                    <div style="color: #2ecc71;">活跃</div>
+                                                                </div>
+                                                                <div>
+                                                                    <div style="font-weight: bold;">月费用</div>
+                                                                    <div>¥89.00</div>
+                                                                </div>
+                                                                <div>
+                                                                    <div style="font-weight: bold;">年费用</div>
+                                                                    <div>¥1,068.00</div>
+                                                                </div>
+                                                                <div>
+                                                                    <div style="font-weight: bold;">下次扣款</div>
+                                                                    <div>2023-07-15</div>
+                                                                </div>
+                                                            </div>
+                                                            
+                                                            <div style="display: flex; gap: 10px;">
+                                                                <button class="btn btn-primary">修改计划</button>
+                                                                <button class="btn btn-secondary">暂停订阅</button>
+                                                                <button class="btn btn-danger">取消订阅</button>
+                                                            </div>
+                                                        </div>
+                                                        
+                                                        <div class="tabs">
+                                                            <div class="tab active">使用情况</div>
+                                                            <div class="tab">账单历史</div>
+                                                            <div class="tab">提醒设置</div>
+                                                        </div>
+                                                        
+                                                        <div class="usage-chart">
+                                                            [使用频率图表]
+                                                        </div>
+                                                        
+                                                        <div style="margin: 20px 0;">
+                                                            <div style="font-weight: bold; margin-bottom: 10px;">使用频率</div>
+                                                            <div class="progress-container">
+                                                                <div class="progress-bar" style="width: 65%;"></div>
+                                                            </div>
+                                                            <div class="progress-label">
+                                                                <span>较少</span>
+                                                                <span>中等</span>
+                                                                <span>频繁</span>
+                                                            </div>
+                                                        </div>
+                                                        
+                                                        <div class="ai-suggestion">
+                                                            <div class="ai-suggestion-title">💡 使用分析</div>
+                                                            <p>您在过去3个月内平均每周使用Netflix 4.5小时，比上一季度减少了30%。考虑到您的使用频率，标准套餐可能更适合您的需求。</p>
+                                                        </div>
+                                                        
+                                                        <h3>价值评估</h3>
+                                                        <div class="card">
+                                                            <div style="display: flex; justify-content: space-between; margin-bottom: 15px;">
+                                                                <div>
+                                                                    <div style="font-weight: bold;">每小时成本</div>
+                                                                    <div>¥4.94</div>
+                                                                </div>
+                                                                <div>
+                                                                    <div style="font-weight: bold;">使用满意度</div>
+                                                                    <div>★★★★☆</div>
+                                                                </div>
+                                                                <div>
+                                                                    <div style="font-weight: bold;">价值评分</div>
+                                                                    <div>7.5/10</div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        
+                                                        <h3>替代方案</h3>
+                                                        <div class="card">
+                                                            <p>以下是基于您的观看习惯推荐的替代方案：</p>
+                                                            <table class="comparison-table">
+                                                                <tr>
+                                                                    <th>服务</th>
+                                                                    <th>月费用</th>
+                                                                    <th>内容匹配度</th>
+                                                                    <th>潜在节省</th>
+                                                                </tr>
+                                                                <tr>
+                                                                    <td>Disney+</td>
+                                                                    <td>¥59.00</td>
+                                                                    <td>87%</td>
+                                                                    <td>¥30.00/月</td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <td>爱奇艺VIP</td>
+                                                                    <td>¥25.00</td>
+                                                                    <td>65%</td>
+                                                                    <td>¥64.00/月</td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <td>腾讯视频VIP</td>
+                                                                    <td>¥30.00</td>
+                                                                    <td>60%</td>
+                                                                    <td>¥59.00/月</td>
+                                                                </tr>
+                                                            </table>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div class="description">
+                                                    <p><strong>页面说明：</strong></p>
+                                                    <p>订阅详情页面提供单个订阅的深入分析和管理功能：</p>
+                                                    <ul>
+                                                        <li>顶部显示订阅的基本信息，包括名称、套餐和图标</li>
+                                                        <li>状态卡片展示订阅状态、费用和下次扣款日期，并提供修改、暂停和取消按钮</li>
+                                                        <li>标签页可以在使用情况、账单历史和提醒设置之间切换</li>
+                                                        <li>使用情况分析展示用户的使用频率和趋势</li>
+                                                        <li>AI分析提供基于用户实际使用情况的个性化建议</li>
+                                                        <li>价值评估部分计算每小时成本和整体价值评分</li>
+                                                        <li>替代方案部分推荐可能更适合用户的其他服务，并显示潜在节省</li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                            
+                                            <!-- 发现页面 -->
+                                            <div class="prototype">
+                                                <div class="prototype-title">发现页面</div>
+                                                <div class="screen">
+                                                    <div class="header">
+                                                        <div>SubScribe+</div>
+                                                        <div style="display: flex; align-items: center; gap: 15px;">
+                                                            <div style="position: relative;">
+                                                                <span>🔔</span>
+                                                                <span style="position: absolute; top: -5px; right: -5px; background-color: #e74c3c; color: white; border-radius: 50%; width: 16px; height: 16px; font-size: 12px; display: flex; align-items: center; justify-content: center;">3</span>
+                                                            </div>
+                                                            <div>张三</div>
+                                                        </div>
+                                                    </div>
+                                                    
+                                                    <div class="nav">
+                                                        <div class="nav-item">概览</div>
+                                                        <div class="nav-item">我的订阅</div>
+                                                        <div class="nav-item active">发现</div>
+                                                        <div class="nav-item">智能推荐</div>
+                                                        <div class="nav-item">设置</div>
+                                                    </div>
+                                                    
+                                                    <div class="content">
+                                                        <h2>发现新订阅</h2>
+                                                        <p style="color: #7f8c8d; margin-bottom: 20px;">浏览热门订阅服务或搜索特定服务</p>
+                                                        
+                                                        <div class="search-bar">
+                                                            <input type="text" class="search-input" placeholder="搜索服务...">
+                                                            <button class="search-btn">搜索</button>
+                                                        </div>
+                                                        
+                                                        <div class="filter-section">
+                                                            <div class="filter-tag active">全部</div>
+                                                            <div class="filter-tag">娱乐</div>
+                                                            <div class="filter-tag">工作</div>
+                                                            <div class="filter-tag">学习</div>
+                                                            <div class="filter-tag">生活</div>
+                                                            <div class="filter-tag">健康</div>
+                                                            <div class="filter-tag">其他</div>
+                                                        </div>
+                                                        
+                                                        <h3>热门订阅</h3>
+                                                        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px; margin-bottom: 30px;">
+                                                            <div class="recommendation-card">
+                                                                <div class="recommendation-header">
+                                                                    <div class="recommendation-title">Netflix</div>
+                                                                    <div class="recommendation-price">¥89.00/月起</div>
+                                                                </div>
+                                                                <div class="recommendation-content">
+                                                                    <p>流媒体视频服务，提供电影、电视剧和原创内容</p>
+                                                                </div>
+                                                                <div class="recommendation-footer">
+                                                                    <div class="recommendation-tags">
+                                                                        <div class="recommendation-tag">娱乐</div>
+                                                                        <div class="recommendation-tag">视频</div>
+                                                                    </div>
+                                                                    <button class="btn btn-primary">查看详情</button>
+                                                                </div>
+                                                            </div>
+                                                            
+                                                            <div class="recommendation-card">
+                                                                <div class="recommendation-header">
+                                                                    <div class="recommendation-title">Spotify Premium</div>
+                                                                    <div class="recommendation-price">¥18.00/月起</div>
+                                                                </div>
+                                                                <div class="recommendation-content">
+                                                                    <p>音乐流媒体服务，无广告、离线收听、高品质音频</p>
+                                                                </div>
+                                                                <div class="recommendation-footer">
+                                                                    <div class="recommendation-tags">
+                                                                        <div class="recommendation-tag">娱乐</div>
+                                                                        <div class="recommendation-tag">音乐</div>
+                                                                    </div>
+                                                                    <button class="btn btn-primary">查看详情</button>
+                                                                </div>
+                                                            </div>
+                                                            
+                                                            <div class="recommendation-card">
+                                                                <div class="recommendation-header">
+                                                                    <div class="recommendation-title">Adobe Creative Cloud</div>
+                                                                    <div class="recommendation-price">¥328.00/月起</div>
+                                                                </div>
+                                                                <div class="recommendation-content">
+                                                                    <p>创意软件套件，包括Photoshop、Illustrator等</p>
+                                                                </div>
+                                                                <div class="recommendation-footer">
+                                                                    <div class="recommendation-tags">
+                                                                        <div class="recommendation-tag">工作</div>
+                                                                        <div class="recommendation-tag">创意</div>
+                                                                    </div>
+                                                                    <button class="btn btn-primary">查看详情</button>
+                                                                </div>
+                                                            </div>
+                                                            
+                                                            <div class="recommendation-card">
+                                                                <div class="recommendation-header">
+                                                                    <div class="recommendation-title">Microsoft 365</div>
+                                                                    <div class="recommendation-price">¥49.00/月起</div>
+                                                                </div>
+                                                                <div class="recommendation-content">
+                                                                    <p>办公软件套件，包括Word、Excel、PowerPoint等</p>
+                                                                </div>
+                                                                <div class="recommendation-footer">
+                                                                    <div class="recommendation-tags">
+                                                                        <div class="recommendation-tag">工作</div>
+                                                                        <div class="recommendation-tag">办公</div>
+                                                                    </div>
+                                                                    <button class="btn btn-primary">查看详情</button>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        
+                                                        <h3>为您推荐</h3>
+                                                        <p style="color: #7f8c8d; margin-bottom: 20px;">基于您现有的订阅和使用习惯</p>
+                                                        
+                                                        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px; margin-bottom: 30px;">
+                                                            <div class="recommendation-card" style="border: 2px solid #3498db;">
+                                                                <div style="position: absolute; top: -10px; right: -10px; background-color: #3498db; color: white; padding: 5px 10px; border-radius: 15px; font-size: 12px; font-weight: bold;">98% 匹配</div>
+                                                                <div class="recommendation-header">
+                                                                    <div class="recommendation-title">YouTube Premium</div>
+                                                                    <div class="recommendation-price">¥58.00/月</div>
+                                                                </div>
+                                                                <div class="recommendation-content">
+                                                                    <p>无广告YouTube体验，背景播放和下载功能</p>
+                                                                </div>
+                                                                <div class="recommendation-footer">
+                                                                    <div class="recommendation-tags">
+                                                                        <div class="recommendation-tag">娱乐</div>
+                                                                        <div class="recommendation-tag">视频</div>
+                                                                    </div>
+                                                                    <button class="btn btn-primary">查看详情</button>
+                                                                </div>
+                                                            </div>
+                                                            
+                                                            <div class="recommendation-card" style="border: 2px solid #3498db;">
+                                                                <div style="position: absolute; top: -10px; right: -10px; background-color: #3498db; color: white; padding: 5px 10px; border-radius: 15px; font-size: 12px; font-weight: bold;">95% 匹配</div>
+                                                                <div class="recommendation-header">
+                                                                    <div class="recommendation-title">Notion Pro</div>
+                                                                    <div class="recommendation-price">¥68.00/月</div>
+                                                                </div>
+                                                                <div class="recommendation-content">
+                                                                    <p>全能工作空间，笔记、任务和知识库一体化</p>
+                                                                </div>
+                                                                <div class="recommendation-footer">
+                                                                    <div class="recommendation-tags">
+                                                                        <div class="recommendation-tag">工作</div>
+                                                                        <div class="recommendation-tag">生产力</div>
+                                                                    </div>
+                                                                    <button class="btn btn-primary">查看详情</button>
+                                                                </div>
+                                                            </div>
+                                                            
+                                                            <div class="recommendation-card" style="border: 2px solid #3498db;">
+                                                                <div style="position: absolute; top: -10px; right: -10px; background-color: #3498db; color: white; padding: 5px 10px; border-radius: 15px; font-size: 12px; font-weight: bold;">90% 匹配</div>
+                                                                <div class="recommendation-header">
+                                                                    <div class="recommendation-title">Keep 会员</div>
+                                                                    <div class="recommendation-price">¥25.00/月</div>
+                                                                </div>
+                                                                <div class="recommendation-content">
+                                                                    <p>专业健身课程、个性化训练计划和饮食建议</p>
+                                                                </div>
+                                                                <div class="recommendation-footer">
+                                                                    <div class="recommendation-tags">
+                                                                        <div class="recommendation-tag">健康</div>
+                                                                        <div class="recommendation-tag">健身</div>
+                                                                    </div>
+                                                                    <button class="btn btn-primary">查看详情</button>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        
+                                                        <h3>热门订阅套餐</h3>
+                                                        <div class="bundle-card">
+                                                            <div class="bundle-header">
+                                                                <div class="bundle-title">娱乐全家桶</div>
+                                                                <div class="bundle-savings">节省 25%</div>
+                                                            </div>
+                                                            <div class="bundle-items">
+                                                                <div class="bundle-item">
+                                                                    <div>Netflix 标准套餐</div>
+                                                                    <div>¥89.00/月</div>
+                                                                </div>
+                                                                <div class="bundle-item">
+                                                                    <div>Spotify Premium</div>
+                                                                    <div>¥18.00/月</div>
+                                                                </div>
+                                                                <div class="bundle-item">
+                                                                    <div>Disney+</div>
+                                                                    <div>¥59.00/月</div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="bundle-footer">
+                                                                <div class="bundle-price">
+                                                                    <div style="text-decoration: line-through; color: #7f8c8d; font-size: 14px;">¥166.00/月</div>
+                                                                    <div>¥124.50/月</div>
+                                                                </div>
+                                                                <button class="btn btn-success">订阅套餐</button>
+                                                            </div>
+                                                        </div>
+                                                        
+                                                        <div class="bundle-card">
+                                                            <div class="bundle-header">
+                                                                <div class="bundle-title">办公效率套餐</div>
+                                                                <div class="bundle-savings">节省 20%</div>
+                                                            </div>
+                                                            <div class="bundle-items">
+                                                                <div class="bundle-item">
+                                                                    <div>Microsoft 365</div>
+                                                                    <div>¥49.00/月</div>
+                                                                </div>
+                                                                <div class="bundle-item">
+                                                                    <div>Notion Pro</div>
+                                                                    <div>¥68.00/月</div>
+                                                                </div>
+                                                                <div class="bundle-item">
+                                                                    <div>Dropbox Plus</div>
+                                                                    <div>¥75.00/月</div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="bundle-footer">
+                                                                <div class="bundle-price">
+                                                                    <div style="text-decoration: line-through; color: #7f8c8d; font-size: 14px;">¥192.00/月</div>
+                                                                    <div>¥153.60/月</div>
+                                                                </div>
+                                                                <button class="btn btn-success">订阅套餐</button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div class="description">
+                                                    <p><strong>页面说明：</strong></p>
+                                                    <p>发现页面帮助用户探索和添加新的订阅服务：</p>
+                                                    <ul>
+                                                        <li>顶部提供搜索功能和分类筛选</li>
+                                                        <li>热门订阅区域展示市场上流行的订阅服务</li>
+                                                        <li>为您推荐区域基于用户现有订阅和使用习惯提供个性化推荐，并显示匹配度</li>
+                                                        <li>热门订阅套餐区域提供多个服务的组合优惠，帮助用户节省费用</li>
+                                                        <li>每个推荐卡片显示服务名称、价格、简短描述和分类标签</li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                            
+                                            <!-- 智能推荐页面 -->
+                                            <div class="prototype">
+                                                <div class="prototype-title">智能推荐页面</div>
+                                                <div class="screen">
+                                                    <div class="header">
+                                                        <div>SubScribe+</div>
+                                                        <div style="display: flex; align-items: center; gap: 15px;">
+                                                            <div style="position: relative;">
+                                                                <span>🔔</span>
+                                                                <span style="position: absolute; top: -5px; right: -5px; background-color: #e74c3c; color: white; border-radius: 50%; width: 16px; height: 16px; font-size: 12px; display: flex; align-items: center; justify-content: center;">3</span>
+                                                            </div>
+                                                            <div>张三</div>
+                                                        </div>
+                                                    </div>
+                                                    
+                                                    <div class="nav">
+                                                        <div class="nav-item">概览</div>
+                                                        <div class="nav-item">我的订阅</div>
+                                                        <div class="nav-item">发现</div>
+                                                        <div class="nav-item active">智能推荐</div>
+                                                        <div class="nav-item">设置</div>
+                                                    </div>
+                                                    
+                                                    <div class="content">
+                                                        <h2>智能订阅优化</h2>
+                                                        <p style="color: #7f8c8d; margin-bottom: 20px;">基于AI分析的个性化订阅优化建议</p>
+                                                        
+                                                        <div class="card" style="margin-bottom: 30px; background-color: #f8f9fa; border-left: 4px solid #3498db;">
+                                                            <h3 style="margin-top: 0;">您的订阅健康状况</h3>
+                                                            <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 15px;">
+                                                                <div style="width: 100px; height: 100px; border-radius: 50%; background: conic-gradient(#e74c3c 0% 30%, #f39c12 30% 60%, #2ecc71 60% 100%); position: relative;">
+                                                                    <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 24px; font-weight: bold;">65</div>
+                                                                </div>
+                                                                <div>
+                                                                    <p>您的订阅效率评分为<strong>65分</strong>，属于<strong>良好</strong>水平。</p>
+                                                                    <p>我们发现了<strong>3个优化机会</strong>，可以帮您每月节省约<strong>¥108</strong>。</p>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        
+                                                        <h3>优化建议</h3>
+                                                        
+                                                        <div class="card" style="margin-bottom: 20px; border-left: 4px solid #e74c3c;">
+                                                            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                                                                <div>
+                                                                    <h4 style="margin-top: 0;">内容重叠：Netflix 和 Disney+</h4>
+                                                                    <p>这两个服务有87%的内容重叠，您在过去3个月中同时使用这两个服务的天数只有8天。</p>
+                                                                    <p><strong>建议：</strong>考虑轮换使用这两个服务，每次只保留一个活跃订阅。</p>
+                                                                    <p><strong>预计每月节省：</strong>¥59.00</p>
+                                                                </div>
+                                                                <div>
+                                                                    <span class="badge badge-danger">高优先级</span>
+                                                                </div>
+                                                            </div>
+                                                            <div style="display: flex; gap: 10px; margin-top: 15px;">
+                                                                <button class="btn btn-primary">接受建议</button>
+                                                                <button class="btn btn-secondary">查看详情</button>
+                                                                <button class="btn btn-secondary">
+                                                                    <button class="btn btn-secondary">忽略</button>
+                                                                </div>
+                                                            </div>
+                                                            
+                                                            <div class="card" style="margin-bottom: 20px; border-left: 4px solid #f39c12;">
+                                                                <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                                                                    <div>
+                                                                        <h4 style="margin-top: 0;">使用率低：Notion Pro</h4>
+                                                                        <p>您在过去2个月内平均每周使用Notion不到1小时，可能无法充分利用Pro版本的高级功能。</p>
+                                                                        <p><strong>建议：</strong>降级到Notion个人版，功能足够满足您当前的使用需求。</p>
+                                                                        <p><strong>预计每月节省：</strong>¥38.00</p>
+                                                                    </div>
+                                                                    <div>
+                                                                        <span class="badge badge-warning">中优先级</span>
+                                                                    </div>
+                                                                </div>
+                                                                <div style="display: flex; gap: 10px; margin-top: 15px;">
+                                                                    <button class="btn btn-primary">接受建议</button>
+                                                                    <button class="btn btn-secondary">查看详情</button>
+                                                                    <button class="btn btn-secondary">忽略</button>
+                                                                </div>
+                                                            </div>
+                                                            
+                                                            <div class="card" style="margin-bottom: 20px; border-left: 4px solid #f39c12;">
+                                                                <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                                                                    <div>
+                                                                        <h4 style="margin-top: 0;">价格优化：Spotify Premium</h4>
+                                                                        <p>您目前使用的是Spotify个人月付方案，但根据您的使用习惯，年付方案更经济。</p>
+                                                                        <p><strong>建议：</strong>切换到Spotify Premium年付方案。</p>
+                                                                        <p><strong>预计每月节省：</strong>¥3.60</p>
+                                                                    </div>
+                                                                    <div>
+                                                                        <span class="badge badge-warning">中优先级</span>
+                                                                    </div>
+                                                                </div>
+                                                                <div style="display: flex; gap: 10px; margin-top: 15px;">
+                                                                    <button class="btn btn-primary">接受建议</button>
+                                                                    <button class="btn btn-secondary">查看详情</button>
+                                                                    <button class="btn btn-secondary">忽略</button>
+                                                                </div>
+                                                            </div>
+                                                            
+                                                            <h3>智能订阅组合</h3>
+                                                            <p style="color: #7f8c8d; margin-bottom: 20px;">基于您的使用习惯和偏好，我们为您设计了最优订阅组合</p>
+                                                            
+                                                            <div class="bundle-card">
+                                                                <div class="bundle-header">
+                                                                    <div class="bundle-title">个性化订阅组合</div>
+                                                                    <div class="bundle-savings">节省 28%</div>
+                                                                </div>
+                                                                <div class="bundle-items">
+                                                                    <div class="bundle-item">
+                                                                        <div>Netflix 标准套餐 (轮换使用)</div>
+                                                                        <div>¥44.50/月</div>
+                                                                    </div>
+                                                                    <div class="bundle-item">
+                                                                        <div>Spotify Premium (年付折算)</div>
+                                                                        <div>¥14.40/月</div>
+                                                                    </div>
+                                                                    <div class="bundle-item">
+                                                                        <div>iCloud+ 200GB</div>
+                                                                        <div>¥21.00/月</div>
+                                                                    </div>
+                                                                    <div class="bundle-item">
+                                                                        <div>Notion 个人版</div>
+                                                                        <div>¥30.00/月</div>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="bundle-footer">
+                                                                    <div class="bundle-price">
+                                                                        <div style="text-decoration: line-through; color: #7f8c8d; font-size: 14px;">¥196.00/月</div>
+                                                                        <div>¥109.90/月</div>
+                                                                    </div>
+                                                                    <button class="btn btn-success">应用此组合</button>
+                                                                </div>
+                                                            </div>
+                                                            
+                                                            <h3>季度订阅报告</h3>
+                                                            <div class="card">
+                                                                <p>我们分析了您过去3个月的订阅使用情况，生成了详细的报告：</p>
+                                                                <ul>
+                                                                    <li>您的订阅总支出：¥588.00</li>
+                                                                    <li>最常用的订阅：Spotify Premium (每周平均12.5小时)</li>
+                                                                    <li>最少使用的订阅：Notion Pro (每周平均0.8小时)</li>
+                                                                    <li>与同类用户相比，您的订阅支出高出15%</li>
+                                                                </ul>
+                                                                <button class="btn btn-primary">查看完整报告</button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    
+                                                    <div class="description">
+                                                        <p><strong>页面说明：</strong></p>
+                                                        <p>智能推荐页面是本系统的核心创新功能，提供基于AI的订阅优化建议：</p>
+                                                        <ul>
+                                                            <li>顶部显示用户的订阅健康状况评分和潜在节省金额</li>
+                                                            <li>优化建议区域列出具体的优化机会，按优先级排序，并提供预计节省金额</li>
+                                                            <li>每个建议卡片提供详细分析和一键接受功能</li>
+                                                            <li>智能订阅组合区域提供整体优化方案，显示最佳订阅组合和总体节省比例</li>
+                                                            <li>季度订阅报告提供长期使用分析和与同类用户的比较</li>
+                                                        </ul>
+                                                        <p>这个页面的创新点在于：</p>
+                                                        <ul>
+                                                            <li>基于实际使用数据进行个性化分析，而不是简单推荐</li>
+                                                            <li>识别内容重叠和使用率低的订阅，提供具体的优化建议</li>
+                                                            <li>提供轮换使用策略，最大化订阅价值</li>
+                                                            <li>计算并展示每项优化的具体节省金额</li>
+                                                        </ul>
+                                                    </div>
+                                                </div>
+                                                
+                                                <!-- 订阅详情添加页面 -->
+                                                <div class="prototype">
+                                                    <div class="prototype-title">订阅详情添加页面</div>
+                                                    <div class="screen">
+                                                        <div class="header">
+                                                            <div>SubScribe+</div>
+                                                            <div style="display: flex; align-items: center; gap: 15px;">
+                                                                <div style="position: relative;">
+                                                                    <span>🔔</span>
+                                                                    <span style="position: absolute; top: -5px; right: -5px; background-color: #e74c3c; color: white; border-radius: 50%; width: 16px; height: 16px; font-size: 12px; display: flex; align-items: center; justify-content: center;">3</span>
+                                                                </div>
+                                                                <div>张三</div>
+                                                            </div>
+                                                        </div>
+                                                        
+                                                        <div class="nav">
+                                                            <div class="nav-item">概览</div>
+                                                            <div class="nav-item active">我的订阅</div>
+                                                            <div class="nav-item">发现</div>
+                                                            <div class="nav-item">智能推荐</div>
+                                                            <div class="nav-item">设置</div>
+                                                        </div>
+                                                        
+                                                        <div class="content">
+                                                            <div style="margin-bottom: 20px;">
+                                                                <a href="#" style="color: #3498db; text-decoration: none;">← 返回我的订阅</a>
+                                                            </div>
+                                                            
+                                                            <h2>添加新订阅</h2>
+                                                            <p style="color: #7f8c8d; margin-bottom: 20px;">输入订阅详情或从推荐列表中选择</p>
+                                                            
+                                                            <div class="tabs">
+                                                                <div class="tab active">手动添加</div>
+                                                                <div class="tab">从列表选择</div>
+                                                                <div class="tab">导入账单</div>
+                                                            </div>
+                                                            
+                                                            <div class="card" style="margin-bottom: 30px;">
+                                                                <div class="form-group">
+                                                                    <label class="form-label">订阅名称</label>
+                                                                    <input type="text" class="form-input" placeholder="例如：Netflix, Spotify等">
+                                                                </div>
+                                                                
+                                                                <div class="form-group">
+                                                                    <label class="form-label">类别</label>
+                                                                    <select class="form-input">
+                                                                        <option>娱乐</option>
+                                                                        <option>工作</option>
+                                                                        <option>学习</option>
+                                                                        <option>生活</option>
+                                                                        <option>健康</option>
+                                                                        <option>其他</option>
+                                                                    </select>
+                                                                </div>
+                                                                
+                                                                <div style="display: flex; gap: 15px;">
+                                                                    <div class="form-group" style="flex: 1;">
+                                                                        <label class="form-label">费用</label>
+                                                                        <input type="number" class="form-input" placeholder="0.00">
+                                                                    </div>
+                                                                    
+                                                                    <div class="form-group" style="flex: 1;">
+                                                                        <label class="form-label">计费周期</label>
+                                                                        <select class="form-input">
+                                                                            <option>每月</option>
+                                                                            <option>每季度</option>
+                                                                            <option>每年</option>
+                                                                            <option>自定义</option>
+                                                                        </select>
+                                                                    </div>
+                                                                </div>
+                                                                
+                                                                <div class="form-group">
+                                                                    <label class="form-label">下次扣款日期</label>
+                                                                    <input type="date" class="form-input">
+                                                                </div>
+                                                                
+                                                                <div class="form-group">
+                                                                    <label class="form-label">提醒设置</label>
+                                                                    <div style="display: flex; gap: 10px; margin-top: 5px;">
+                                                                        <label style="display: flex; align-items: center; gap: 5px;">
+                                                                            <input type="checkbox" checked> 扣款前3天提醒
+                                                                        </label>
+                                                                        <label style="display: flex; align-items: center; gap: 5px;">
+                                                                            <input type="checkbox"> 价格变动提醒
+                                                                        </label>
+                                                                        <label style="display: flex; align-items: center; gap: 5px;">
+                                                                            <input type="checkbox"> 使用率低提醒
+                                                                        </label>
+                                                                    </div>
+                                                                </div>
+                                                                
+                                                                <div class="form-group">
+                                                                    <label class="form-label">备注</label>
+                                                                    <textarea class="form-input" rows="3" placeholder="添加关于此订阅的备注..."></textarea>
+                                                                </div>
+                                                                
+                                                                <div style="display: flex; gap: 10px; margin-top: 20px;">
+                                                                    <button class="btn btn-primary">保存订阅</button>
+                                                                    <button class="btn btn-secondary">取消</button>
+                                                                </div>
+                                                            </div>
+                                                            
+                                                            <div class="ai-suggestion">
+                                                                <div class="ai-suggestion-title">💡 智能识别</div>
+                                                                <p>我们检测到您最近的银行账单中有一笔¥89.00的Netflix付款。您想要添加这个订阅吗？</p>
+                                                                <div style="display: flex; gap: 10px; margin-top: 10px;">
+                                                                    <button class="btn btn-primary">添加Netflix</button>
+                                                                    <button class="btn btn-secondary">不是现在</button>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    
+                                                    <div class="description">
+                                                        <p><strong>页面说明：</strong></p>
+                                                        <p>订阅详情添加页面允许用户手动添加新的订阅服务：</p>
+                                                        <ul>
+                                                            <li>提供三种添加方式：手动添加、从列表选择和导入账单</li>
+                                                            <li>手动添加表单包含订阅的基本信息：名称、类别、费用、计费周期和下次扣款日期</li>
+                                                            <li>提醒设置允许用户自定义何时接收关于此订阅的通知</li>
+                                                            <li>备注字段可以添加额外信息</li>
+                                                            <li>智能识别功能可以从用户的银行账单中自动检测订阅付款，并提供一键添加功能</li>
+                                                        </ul>
+                                                    </div>
+                                                </div>
+                                                
+                                                <!-- 设置页面 -->
+                                                <div class="prototype">
+                                                    <div class="prototype-title">设置页面</div>
+                                                    <div class="screen">
+                                                        <div class="header">
+                                                            <div>SubScribe+</div>
+                                                            <div style="display: flex; align-items: center; gap: 15px;">
+                                                                <div style="position: relative;">
+                                                                    <span>🔔</span>
+                                                                    <span style="position: absolute; top: -5px; right: -5px; background-color: #e74c3c; color: white; border-radius: 50%; width: 16px; height: 16px; font-size: 12px; display: flex; align-items: center; justify-content: center;">3</span>
+                                                                </div>
+                                                                <div>张三</div>
+                                                            </div>
+                                                        </div>
+                                                        
+                                                        <div class="nav">
+                                                            <div class="nav-item">概览</div>
+                                                            <div class="nav-item">我的订阅</div>
+                                                            <div class="nav-item">发现</div>
+                                                            <div class="nav-item">智能推荐</div>
+                                                            <div class="nav-item active">设置</div>
+                                                        </div>
+                                                        
+                                                        <div class="content">
+                                                            <h2>设置</h2>
+                                                            
+                                                            <div style="display: flex; gap: 30px;">
+                                                                <div style="width: 200px;">
+                                                                    <div style="background-color: #f8f9fa; border-radius: 5px; padding: 15px;">
+                                                                        <div style="font-weight: bold; padding: 10px; background-color: #3498db; color: white; border-radius: 5px; margin-bottom: 10px;">账户设置</div>
+                                                                        <div style="padding: 10px; cursor: pointer;">通知设置</div>
+                                                                        <div style="padding: 10px; cursor: pointer;">支付方式</div>
+                                                                        <div style="padding: 10px; cursor: pointer;">数据导入/导出</div>
+                                                                        <div style="padding: 10px; cursor: pointer;">隐私设置</div>
+                                                                        <div style="padding: 10px; cursor: pointer;">帮助与支持</div>
+                                                                    </div>
+                                                                </div>
+                                                                
+                                                                <div style="flex: 1;">
+                                                                    <div class="card" style="margin-bottom: 20px;">
+                                                                        <h3 style="margin-top: 0;">个人资料</h3>
+                                                                        
+                                                                        <div class="form-group">
+                                                                            <label class="form-label">姓名</label>
+                                                                            <input type="text" class="form-input" value="张三">
+                                                                        </div>
+                                                                        
+                                                                        <div class="form-group">
+                                                                            <label class="form-label">电子邮箱</label>
+                                                                            <input type="email" class="form-input" value="zhangsan@example.com">
+                                                                        </div>
+                                                                        
+                                                                        <div class="form-group">
+                                                                            <label class="form-label">手机号码</label>
+                                                                            <input type="tel" class="form-input" value="138****5678">
+                                                                        </div>
+                                                                        
+                                                                        <div class="form-group">
+                                                                            <label class="form-label">密码</label>
+                                                                            <input type="password" class="form-input" value="********">
+                                                                        </div>
+                                                                        
+                                                                        <button class="btn btn-primary">保存更改</button>
+                                                                    </div>
+                                                                    
+                                                                    <div class="card" style="margin-bottom: 20px;">
+                                                                        <h3 style="margin-top: 0;">预算设置</h3>
+                                                                        
+                                                                        <div class="form-group">
+                                                                            <label class="form-label">月度订阅预算</label>
+                                                                            <input type="number" class="form-input" value="300">
+                                                                        </div>
+                                                                        
+                                                                        <div style="margin-bottom: 15px;">
+                                                                            <label class="form-label">当前使用情况</label>
+                                                                            <div class="progress-container">
+                                                                                <div class="progress-bar" style="width: 85%;"></div>
+                                                                            </div>
+                                                                            <div class="progress-label">
+                                                                                <span>¥0</span>
+                                                                                <span>¥255 / ¥300</span>
+                                                                            </div>
+                                                                        </div>
+                                                                        
+                                                                        <div class="form-group">
+                                                                            <label class="form-label">预算提醒</label>
+                                                                            <div style="display: flex; gap: 10px; margin-top: 5px;">
+                                                                                <label style="display: flex; align-items: center; gap: 5px;">
+                                                                                    <input type="checkbox" checked> 达到80%时提醒
+                                                                                </label>
+                                                                                <label style="display: flex; align-items: center; gap: 5px;">
+                                                                                    <input type="checkbox" checked> 达到100%时提醒
+                                                                                </label>
+                                                                            </div>
+                                                                        </div>
+                                                                        
+                                                                        <button class="btn btn-primary">保存预算设置</button>
+                                                                    </div>
+                                                                    
+                                                                    <div class="card">
+                                                                        <h3 style="margin-top: 0;">智能分析设置</h3>
+                                                                        
+                                                                        <div class="form-group">
+                                                                            <label class="form-label">数据分析权限</label>
+                                                                            <div style="display: flex; gap: 10px; margin-top: 5px;">
+                                                                                <label style="display: flex; align-items: center; gap: 5px;">
+                                                                                    <input type="checkbox" checked> 允许分析订阅使用情况
+                                                                                </label>
+                                                                                <label style="display: flex; align-items: center; gap: 5px;">
+                                                                                    <input type="checkbox" checked> 允许提供个性化推荐
+                                                                                </label>
+                                                                                <label style="display: flex; align-items: center; gap: 5px;">
+                                                                                    <input type="checkbox" checked> 允许检测重复订阅
+                                                                                </label>
+                                                                            </div>
+                                                                        </div>
+                                                                        
+                                                                        <div class="form-group">
+                                                                            <label class="form-label">优化建议频率</label>
+                                                                            <select class="form-input">
+                                                                                <option>每周</option>
+                                                                                <option selected>每两周</option>
+                                                                                <option>每月</option>
+                                                                                <option>手动触发</option>
+                                                                            </select>
+                                                                        </div>
+                                                                        
+                                                                        <div class="form-group">
+                                                                            <label class="form-label">优化策略偏好</label>
+                                                                            <select class="form-input">
+                                                                                <option>最大化节省 (可能影响使用体验)</option>
+                                                                                <option selected>平衡节省和体验</option>
+                                                                                <option>保持最佳体验 (适度节省)</option>
+                                                                            </select>
+                                                                        </div>
+                                                                        
+                                                                        <button class="btn btn-primary">保存分析设置</button>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    
+                                                    <div class="description">
+                                                        <p><strong>页面说明：</strong></p>
+                                                        <p>设置页面允许用户自定义系统的各种参数和偏好：</p>
+                                                        <ul>
+                                                            <li>左侧导航栏提供不同设置类别的快速访问</li>
+                                                            <li>个人资料部分允许用户更新基本信息</li>
+                                                            <li>预算设置部分允许用户设定月度订阅预算和提醒阈值</li>
+                                                            <li>智能分析设置部分允许用户控制数据分析权限、优化建议频率和优化策略偏好</li>
+                                                            <li>用户可以选择不同的优化策略，从最大化节省到保持最佳体验</li>
+                                                        </ul>
+                                                    </div>
+                                                </div>
+                                                
+                                                <!-- 通知中心页面 -->
+                                                <div class="prototype">
+                                                    <div class="prototype-title">通知中心页面</div>
+                                                    <div class="screen">
+                                                        <div class="header">
+                                                            <div>SubScribe+</div>
+                                                            <div style="display: flex; align-items: center; gap: 15px;">
+                                                                <div style="position: relative;">
+                                                                    <span>🔔</span>
+                                                                    <span style="position: absolute; top: -5px; right: -5px; background-color: #e74c3c; color: white; border-radius: 50%; width: 16px; height: 16px; font-size: 12px; display: flex; align-items: center; justify-content: center;">3</span>
+                                                                </div>
+                                                                <div>张三</div>
+                                                            </div>
+                                                        </div>
+                                                        
+                                                        <div class="modal-overlay">
+                                                            <div class="modal">
+                                                                <div class="modal-header">
+                                                                    <div class="modal-title">通知中心</div>
+                                                                    <button class="modal-close">×</button>
+                                                                </div>
+                                                                
+                                                                <div class="modal-body">
+                                                                    <div class="tabs">
+                                                                        <div class="tab active">全部</div>
+                                                                        <div class="tab">未读 (3)</div>
+                                                                        <div class="tab">重要</div>
+                                                                    </div>
+                                                                    
+                                                                    <div class="card" style="background-color: #f8f9fa; margin-bottom: 15px;">
+                                                                        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                                                                            <div>
+                                                                                <div style="font-weight: bold;">Netflix 即将扣款</div>
+                                                                                <div style="color: #7f8c8d; font-size: 14px;">3天后 (2023-06-18) 将从您的账户扣款¥89.00</div>
+                                                                            </div>
+                                                                            <div>
+                                                                                <span class="badge badge-primary">新</span>
+                                                                            </div>
+                                                                        </div>
+                                                                        <div style="display: flex; gap: 10px; margin-top: 10px;">
+                                                                            <button class="btn btn-secondary">查看详情</button>
+                                                                            <button class="btn btn-secondary">标记为已读</button>
+                                                                        </div>
+                                                                    </div>
+                                                                    
+                                                                    <div class="card" style="background-color: #f8f9fa; margin-bottom: 15px;">
+                                                                        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                                                                            <div>
+                                                                                <div style="font-weight: bold;">发现新的优化机会</div>
+                                                                                <div style="color: #7f8c8d; font-size: 14px;">我们分析了您的订阅，发现了可以节省¥108/月的优化机会</div>
+                                                                            </div>
+                                                                            <div>
+                                                                                <span class="badge badge-primary">新</span>
+                                                                            </div>
+                                                                        </div>
+                                                                        <div style="display: flex; gap: 10px; margin-top: 10px;">
+                                                                            <button class="btn btn-primary">查看优化建议</button>
+                                                                            <button class="btn btn-secondary">标记为已读</button>
+                                                                        </div>
+                                                                    </div>
+                                                                    
+                                                                    <div class="card" style="background-color: #f8f9fa; margin-bottom: 15px;">
+                                                                        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                                                                            <div>
+                                                                                <div style="font-weight: bold;">Spotify价格变动</div>
+                                                                                <div style="color: #7f8c8d; font-size: 14px;">Spotify Premium将于下月起涨价至¥19.00/月 (+¥1.00)</div>
+                                                                            </div>
+                                                                            <div>
+                                                                                <span class="badge badge-primary">新</span>
+                                                                            </div>
+                                                                        </div>
+                                                                        <div style="display: flex; gap: 10px; margin-top: 10px;">
+                                                                            <button class="btn btn-secondary">查看详情</button>
+                                                                            <button class="btn btn-secondary">标记为已读</button>
+                                                                        </div>
+                                                                    </div>
+                                                                    
+                                                                    <div class="card" style="margin-bottom: 15px;">
+                                                                        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                                                                            <div>
+                                                                                <div style="font-weight: bold;">订阅预算提醒</div>
+                                                                                <div style="color: #7f8c8d; font-size: 14px;">您的月度订阅支出已达到预算的85% (¥255/¥300)</div>
+                                                                            </div>
+                                                                        </div>
+                                                                        <div style="display: flex; gap: 10px; margin-top: 10px;">
+                                                                            <button class="btn btn-secondary">查看详情</button>
+                                                                        </div>
+                                                                    </div>
+                                                                    
+                                                                    <div class="card" style="margin-bottom: 15px;">
+                                                                        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                                                                            <div>
+                                                                                <div style="font-weight: bold;">iCloud+ 续费成功</div>
+                                                                                <div style="color: #7f8c8d; font-size: 14px;">您的iCloud+ 200GB存储已成功续费，¥21.00已从您的账户扣除</div>
+                                                                            </div>
+                                                                        </div>
+                                                                        <div style="display: flex; gap: 10px; margin-top: 10px;">
+                                                                            <button class="btn btn-secondary">查看详情</button>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                                
+                                                                <div class="modal-footer">
+                                                                    <button class="btn btn-secondary">全部标记为已读</button>
+                                                                    <button class="btn btn-primary">关闭</button>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    
+                                                    <div class="description">
+                                                        <p><strong>页面说明：</strong></p>
+                                                        <p>通知中心页面以弹窗形式展示用户的所有通知：</p>
+                                                        <ul>
+                                                            <li>标签页可以在全部、未读和重要通知之间切换</li>
+                                                            <li>每个通知卡片显示标题、内容和相关操作按钮</li>
+                                                            <li>未读通知有特殊背景色和"新"标签</li>
+                                                            <li>通知类型包括：
+                                                                <ul>
+                                                                    <li>即将扣款提醒</li>
+                                                                    <li>优化机会通知</li>
+                                                                    <li>价格变动提醒</li>
+                                                                    <li>预算提醒</li>
+                                                                    <li>续费确认</li>
+                                                                </ul>
+                                                            </li>
+                                                            <li>底部提供全部标记为已读的快捷操作</li>
+                                                        </ul>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </body>
+                                        </html>

@@ -3,6 +3,7 @@ import datetime
 from urllib.parse import urlparse
 from getpass import getpass
 import hashlib
+from src.data_processing.web_crawler import fetch_and_clean_content
 from src.data_processing import WebCrawler
 import pandas as pd
 
@@ -126,7 +127,7 @@ class RecommendationSystem:
             print(f"订阅添加成功: {url} - {prompt}")
             
             # 创建WebCrawler实例并立即爬取
-            crawler = WebCrawler(f"user_{self.current_user}", self.db_name)
+            crawler = WebCrawler( self.db_name)
             crawl_success = crawler.crawl_and_store(url, subscription_id)
             
             if crawl_success:
@@ -318,6 +319,17 @@ def create_interface():
                 fn=rec_system.get_subscription_updates,
                 inputs=None,
                 outputs=[update_status, update_table]
+            )
+
+        # 网页内容爬取界面
+        with gr.Tab("网页内容爬取"):
+            crawl_url = gr.Textbox(label="URL")
+            crawl_output = gr.Textbox(label="爬取结果", lines=10)
+            crawl_button = gr.Button("开始爬取")
+            crawl_button.click(
+                fn=fetch_and_clean_content,
+                inputs=crawl_url,
+                outputs=crawl_output
             )
 
     return demo

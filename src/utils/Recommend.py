@@ -7,6 +7,11 @@ from metagpt.context import Context
 from typing import ClassVar
 from pydantic import BaseModel
 
+
+
+## 用于推荐的角色
+
+
 class RecommendationAgent(Role):
     """
     A recommendation agent based on MetaGPT framework.

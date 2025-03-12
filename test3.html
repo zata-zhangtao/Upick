@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Understanding Mixture of Experts (MoE)</title>
+    <style>
+        .slide {
+            display: none;
+            padding: 50px;
+            text-align: center;
+            height: 100vh;
+            background-color: #f5f5f5;
+        }
+        .slide.active {
+            display: block;
+        }
+        .title {
+            font-size: 2.5em;
+            color: #333;
+        }
+        .content {
+            font-size: 1.5em;
+            margin-top: 30px;
+            color: #666;
+        }
+        .navigation {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            font-size: 1.2em;
+        }
+    </style>
+</head>
+<body>
+    <div id="slide1" class="slide active">
+        <h1 class="title">Mixture of Experts (MoE)</h1>
+        <p class="content">An Advanced Neural Network Architecture</p>
+    </div>
+
+    <div id="slide2" class="slide">
+        <h1 class="title">What is MoE?</h1>
+        <div class="content">
+            <p>• A neural network architecture that combines multiple expert networks</p>
+            <p>• Each expert specializes in different aspects of the input</p>
+            <p>• Uses a gating mechanism to route inputs to appropriate experts</p>
+        </div>
+    </div>
+
+    <div id="slide3" class="slide">
+        <h1 class="title">Key Components</h1>
+        <div class="content">
+            <p>1. Expert Networks</p>
+            <p>2. Gating Network</p>
+            <p>3. Router Mechanism</p>
+            <p>4. Output Combination</p>
+        </div>
+    </div>
+
+    <div id="slide4" class="slide">
+        <h1 class="title">Benefits of MoE</h1>
+        <div class="content">
+            <p>• Improved Model Capacity</p>
+            <p>• Better Computational Efficiency</p>
+            <p>• Specialized Learning</p>
+            <p>• Scalability</p>
+        </div>
+    </div>
+
+    <div id="slide5" class="slide">
+        <h1 class="title">Applications</h1>
+        <div class="content">
+            <p>• Large Language Models</p>
+            <p>• Computer Vision</p>
+            <p>• Multi-task Learning</p>
+            <p>• Recommendation Systems</p>
+        </div>
+    </div>
+
+    <div class="navigation">
+        <button onclick="previousSlide()">Previous</button>
+        <button onclick="nextSlide()">Next</button>
+    </div>
+
+    <script>
+        let currentSlide = 1;
+        const totalSlides = 5;
+
+        function showSlide(slideNumber) {
+            document.querySelectorAll('.slide').forEach(slide => {
+                slide.classList.remove('active');
+            });
+            document.getElementById(`slide${slideNumber}`).classList.add('active');
+        }
+
+        function nextSlide() {
+            if (currentSlide < totalSlides) {
+                currentSlide++;
+                showSlide(currentSlide);
+            }
+        }
+
+        function previousSlide() {
+            if (currentSlide > 1) {
+                currentSlide--;
+                showSlide(currentSlide);
+            }
+        }
+    </script>
+</body>
+</html>

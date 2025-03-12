@@ -1,2 +1,8 @@
 # python=3.10
-metagpt
+langchain
+langchain-community
+langchain-openai
+langgraph==0.3.7
+beautifulsoup4==4.13.3
+pandas==2.2.3
+gradio==5.20.1
