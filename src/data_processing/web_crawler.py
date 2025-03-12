@@ -6,8 +6,12 @@ from bs4 import BeautifulSoup  # 添加BeautifulSoup来清理HTML
 import datetime
 
 
+<<<<<<< HEAD
 import requests
 from bs4 import BeautifulSoup
+=======
+# region 爬虫函数，传入url，返回内容
+>>>>>>> dc876f0f11b6cf36328869cebbf1e4efa3b82f5f
 def fetch_and_clean_content(url):
     try:
         headers = {
@@ -19,6 +23,7 @@ def fetch_and_clean_content(url):
         if response.status_code != 200:
             return f"Failed to retrieve the page. Status code: {response.status_code}"
 
+<<<<<<< HEAD
         # 检测网页编码
         if 'charset' in response.headers.get('content-type', '').lower():
             response.encoding = response.apparent_encoding
@@ -43,6 +48,10 @@ def fetch_and_clean_content(url):
                     except UnicodeDecodeError:
                         continue
 
+=======
+        # 自动检测编码
+        response.encoding = response.apparent_encoding
+>>>>>>> dc876f0f11b6cf36328869cebbf1e4efa3b82f5f
         raw_html = response.text
 
         soup = BeautifulSoup(raw_html, 'html.parser')
@@ -61,7 +70,26 @@ def fetch_and_clean_content(url):
         return clean_text
 
     except Exception as e:
+<<<<<<< HEAD
         return f"Error: {e}"
+=======
+        return False
+
+# endregion
+
+
+
+
+
+
+
+
+
+
+
+
+
+>>>>>>> dc876f0f11b6cf36328869cebbf1e4efa3b82f5f
 
 
 
@@ -126,7 +154,18 @@ class WebCrawler:
             # 清理内容
             clean_content = self.clean_content(raw_content)
             
+<<<<<<< HEAD
 
+=======
+            # 生成对比文件
+            # with open('content_comparison.txt', 'w', encoding='utf-8') as f:
+            #     f.write("=== 原始内容 (前1000字符) ===\n")
+            #     f.write(raw_content[:10000] + "\n\n")
+            #     f.write("=== 清理后内容 (前1000字符) ===\n")
+            #     f.write(clean_content[:10000] + "\n")
+            
+            # print("已生成对比文件：content_comparison.txt")
+>>>>>>> dc876f0f11b6cf36328869cebbf1e4efa3b82f5f
             return clean_content
             
         except requests.exceptions.RequestException as e:

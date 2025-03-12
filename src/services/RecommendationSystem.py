@@ -320,6 +320,12 @@ def create_interface():
                 inputs=None,
                 outputs=[update_status, update_table]
             )
+            
+        with gr.Tab("爬虫效果"):
+            
+            gret = WebCrawler("zata").crawl_raw_content
+            gr.Interface(fn=gret, inputs="text", outputs="text")
+
 
         # 网页内容爬取界面
         with gr.Tab("网页内容爬取"):
