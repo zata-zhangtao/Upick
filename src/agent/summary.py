@@ -9,7 +9,7 @@ from src.agent.llm import get_ali_llm
 # 定义固定的summary JSON格式模板
 SUMMARY_TEMPLATE = {
     "summary": {
-        "content": "",
+        "content": [],
         "key_points": [],
         "word_count": 0,
         "generated_at": ""
@@ -23,10 +23,6 @@ class SubscriptionAgent:
         # 初始化LLM，如果没有传入特定模型，使用默认配置
         self.llm = llm_model if llm_model else get_ali_llm("qwen-7b-chat")
 
-        # test
-        print("----")
-        print(self.llm.invoke("你好"))
-        print("----")
         
         # 定义提示模板
         self.prompt_template = PromptTemplate(
@@ -38,13 +34,14 @@ class SubscriptionAgent:
             要求：
             1. 提供简洁的内容更新概要
             2. 提取关键点
-            3. 计算总字数
-            返回结果使用中文
+            3. 计算内容的列表长度
+            返回结果使用中文,如果没有关键点，请返回空数组。
+            请根据以上要求，总结出订阅内容的更新情况，并返回结果。
 
             返回格式json（请严格按照以下格式返回）：
             {{
                 "summary": {{
-                    "content": "",
+                    "content": [],
                     "key_points": [],
                     "word_count": 0,
                     "generated_at": ""
@@ -83,10 +80,6 @@ class SubscriptionAgent:
     
 
             # 创建响应对象
-            print("summary_content: ", summary_content)
-            print("key_points: ", key_points)
-            print("word_count: ", word_count)
-            print("generated_at: ", generated_at)
             response = SUMMARY_TEMPLATE.copy()
             response["summary"]["content"] = summary_content
             response["summary"]["key_points"] = key_points

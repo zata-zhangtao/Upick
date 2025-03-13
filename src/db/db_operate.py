@@ -1,4 +1,5 @@
 import sqlite3
+from src.agent import SubscriptionAgent
 
 
 SUBSCRIPTIONS_DB_PATH = 'resources\database\subscriptions.db'
@@ -67,7 +68,9 @@ def refresh_content():
     current_time = datetime.now()
     crawler = WebCrawler()
     updated_count = 0
-
+    
+    
+    # 
     for sub_id, url, last_updated, interval in subscriptions:
         last_updated = datetime.strptime(last_updated, '%Y-%m-%d %H:%M:%S')
         time_diff = current_time - last_updated
@@ -96,11 +99,13 @@ def refresh_content():
             
             # Calculate differences and store in content_updates
             similarity, diffs = get_content_diff(old_content, new_content)
+            summary = SubscriptionAgent().generate_summary(diffs)
+            print(summary)
             c.execute("""
                 INSERT INTO content_updates 
-                (subscription_id, old_content_id, new_content_id, similarity_ratio, diff_details)
-                VALUES (?, ?, ?, ?, ?)
-            """, (sub_id, old_content_id, new_content_id, similarity, json.dumps(diffs,ensure_ascii=False)))
+                (subscription_id, old_content_id, new_content_id, similarity_ratio, diff_details, summary)
+                VALUES (?, ?, ?, ?, ?, ?)
+            """, (sub_id, old_content_id, new_content_id, similarity, json.dumps(diffs,ensure_ascii=False), json.dumps(summary,ensure_ascii=False)))
             
             # Update last_updated_at timestamp
             c.execute("""
@@ -121,7 +126,7 @@ def get_updates():
     conn = sqlite3.connect('resources/database/subscriptions.db')
     c = conn.cursor()
     c.execute("""
-        SELECT cu.diff_details, cu.updated_at, s.url
+        SELECT cu.diff_details, cu.summary, cu.updated_at, s.url
         FROM content_updates cu
         JOIN subscriptions s ON cu.subscription_id = s.id
         ORDER BY cu.updated_at DESC
@@ -131,11 +136,11 @@ def get_updates():
     
     # Format updates into table rows
     rows = []
-    headers = ["URL", "Updated At", "Changes"]
+    headers = ["URL", "Updated At", "Changes","diff_details"]
     rows.append(headers)
     
-    for diff, updated_at, url in updates:
-        rows.append([url, updated_at, diff])
+    for diff_details, summary, updated_at, url in updates:
+        rows.append([url, updated_at, summary, diff_details])
     
     return rows
 

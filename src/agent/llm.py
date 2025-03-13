@@ -17,5 +17,9 @@ def get_ali_llm(model="qwen-plus"):
         # other params...
     )
 
-ali_llm = get_ali_llm("qwen-7b-chat")
-print(ali_llm.invoke("2025年的技术趋势是什么？"))
+try:
+    ali_llm = get_ali_llm("qwen-7b-chat")
+    print(ali_llm.invoke("现在是测试，你只需要回答：‘阿里云平台api连接成功’"))
+except Exception as e:
+    # print("阿里云模型连接失败")
+    assert False, "阿里云模型连接失败"
