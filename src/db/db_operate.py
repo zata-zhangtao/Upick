@@ -1,4 +1,4 @@
-from ast import List
+from typing import List,Tuple
 import sqlite3
 from src.agent import SubscriptionAgent
 
@@ -122,7 +122,7 @@ def refresh_content():
 
     return f"Successfully refreshed content for {updated_count} "
 
-def get_updates() -> List[List[str, str, str, str]]:
+def get_updates() -> List[Tuple[str, str, str, str]]:
     """
     Get content updates from database.
     
