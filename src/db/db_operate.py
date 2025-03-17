@@ -1,3 +1,4 @@
+from ast import List
 import sqlite3
 from src.agent import SubscriptionAgent
 
@@ -105,7 +106,7 @@ def refresh_content():
                 INSERT INTO content_updates 
                 (subscription_id, old_content_id, new_content_id, similarity_ratio, diff_details, summary)
                 VALUES (?, ?, ?, ?, ?, ?)
-            """, (sub_id, old_content_id, new_content_id, similarity, json.dumps(diffs,ensure_ascii=False), json.dumps(summary,ensure_ascii=False)))
+            """, (sub_id, old_content_id, new_content_id, similarity, json.dumps(diffs,ensure_ascii=False), json.dumps(summary.model_dump(),ensure_ascii=False)))
             
             # Update last_updated_at timestamp
             c.execute("""
@@ -121,28 +122,36 @@ def refresh_content():
 
     return f"Successfully refreshed content for {updated_count} "
 
-def get_updates():
-    """Get content updates from database"""
+def get_updates() -> List[List[str, str, str, str]]:
+    """
+    Get content updates from database.
+    
+    Returns:
+        List[List[str, str, str, str]]: A list of updates, where each update contains
+                                        [url, updated_at, summary, diff_details]
+    """
+    # Connect to database
     conn = sqlite3.connect('resources/database/subscriptions.db')
     c = conn.cursor()
+    
+    # Query for content updates joined with subscription information
     c.execute("""
         SELECT cu.diff_details, cu.summary, cu.updated_at, s.url
         FROM content_updates cu
         JOIN subscriptions s ON cu.subscription_id = s.id
         ORDER BY cu.updated_at DESC
     """)
+    
+    # Fetch all results
     updates = c.fetchall()
     conn.close()
     
-    # Format updates into table rows
-    rows = []
-    headers = ["URL", "Updated At", "Changes","diff_details"]
-    rows.append(headers)
-    
+    # Format updates into a more readable structure
+    formatted_updates = []
     for diff_details, summary, updated_at, url in updates:
-        rows.append([url, updated_at, summary, diff_details])
+        formatted_updates.append([url, updated_at, summary, diff_details])
     
-    return rows
+    return formatted_updates
 
 
 

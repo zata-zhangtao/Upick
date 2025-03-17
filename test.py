@@ -1,48 +1,123 @@
-def generate_summary(self, contentdiff: str) -> dict:
-    """
-    生成summary的主函数
-    参数:
-        contentdiff: 输入的内容差异文本
-    返回:
-        dict: 固定格式的JSON结果
-    """
-    try:
-        # 执行LLM链获取结果，输入需要是字典格式
-        result = self.chain.invoke({"contentdiff": contentdiff})
+from datetime import datetime
+from langchain.prompts import PromptTemplate
+from langchain_core.runnables import RunnableSequence
+from langchain.chains import LLMChain, SequentialChain
+from langchain_core.output_parsers.json import SimpleJsonOutputParser
+import json
+from src.agent.llm import get_ali_llm
+
+# 定义固定的summary JSON格式模板
+SUMMARY_TEMPLATE = {
+    "summary": {
+        "content": [],
+        "key_points": [],
+        "word_count": 0,
+        "generated_at": ""
+    },
+    "status": "success",
+    "error_message": None
+}
+
+class SubscriptionAgent:
+    def __init__(self, llm_model=None):
+        # 初始化LLM，如果没有传入特定模型，使用默认配置
+        self.llm = llm_model if llm_model else get_ali_llm("qwq-32b")
+
         
-        # 解析结果（假设LLM返回的是JSON字符串）
+        # 定义提示模板
+        self.prompt_template = PromptTemplate(
+            input_variables=["contentdiff"],
+            template="""
+            你是一个订阅号运营专家，可以根据差异内容总结出订阅内容的更新情况，请对以下内容差异进行总结：
+            {contentdiff}
+
+            注意，有些内容的可能仅仅是时间或者数据的变化，这样的内容更新是不需要总结的，可以看作没有更新，返回空数组
+
+            要求：
+            1. 提供简洁的内容更新概要
+            2. 提取关键点
+            3. 计算内容的列表长度
+            返回结果使用中文,如果内容更新或者没有关键点，请返回空数组。
+            请根据以上要求，总结出订阅内容的更新情况，并返回结果。
+            
+
+            返回格式json（请严格按照以下格式返回）：
+            {{
+                "summary": {{
+                    "content": [],
+                    "key_points": [],
+                    "word_count": 0,
+                    "generated_at": ""
+                }},
+            }}
+            
+
+            """
+        )
+        
+        # 创建LLM链
+        self.chain = self.prompt_template | self.llm 
+
+
+
+    def generate_summary(self, contentdiff: str) -> dict:
+        """
+        生成summary的主函数
+        参数:
+            contentdiff: 输入的内容差异文本
+        返回:
+            dict: 固定格式的JSON结果
+        """
         try:
+            # 执行LLM链获取结果，输入需要是字典格式
+            result = self.chain.invoke({"contentdiff": contentdiff}).content
+            print("result: ", result)
+            # 解析结果（假设LLM返回的是JSON字符串）
+    
             # 假设返回的是JSON格式字符串，尝试解析
             parsed_result = json.loads(result)
             summary_content = parsed_result["summary"]["content"]
             key_points = parsed_result["summary"]["key_points"]
             word_count = parsed_result["summary"]["word_count"]
             generated_at = parsed_result["summary"]["generated_at"]
-        except json.JSONDecodeError:
-            # 如果返回的不是JSON，尝试手动解析纯文本
-            lines = result.strip().split('\n')
-            summary_content = ""
-            key_points = []
-            for line in lines:
-                if line.startswith("Summary:"):
-                    summary_content = line.replace("Summary:", "").strip()
-                elif line.startswith("- "):
-                    key_points.append(line[2:].strip())
-            word_count = len(contentdiff.split())
-            generated_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    
 
-        # 创建响应对象
-        response = SUMMARY_TEMPLATE.copy()
-        response["summary"]["content"] = summary_content
-        response["summary"]["key_points"] = key_points
-        response["summary"]["word_count"] = word_count
-        response["summary"]["generated_at"] = generated_at
+            # 创建响应对象
+            response = SUMMARY_TEMPLATE.copy()
+            response["summary"]["content"] = summary_content
+            response["summary"]["key_points"] = key_points
+            response["summary"]["word_count"] = word_count
+            response["summary"]["generated_at"] = generated_at
 
-        return response
+            return response
 
-    except Exception as e:
-        # 错误处理
-        error_response = SUMMARY_TEMPLATE.copy()
-        error_response["status"] = "error"
-        error_response["error_message"] = str(e)
-        return error_response
+        except Exception as e:
+            # 错误处理
+            error_response = SUMMARY_TEMPLATE.copy()
+            error_response["status"] = "error"
+            error_response["error_message"] = f"Error on line {e.__traceback__.tb_lineno}: {str(e)}"
+            return error_response
+# 使用示例
+def main():
+    # 创建示例contentdiff
+    # sample_contentdiff = """
+    # Original: The quick brown fox jumps over the lazy dog.
+    # Updated: The swift brown fox leaps over the idle dog quickly.
+    # """
+
+    sample_contentdiff = input("请输入内容差异: ")
+    
+    
+    # 初始化智能体
+    agent = SubscriptionAgent()
+    summary_result = agent.generate_summary(sample_contentdiff)
+    print(summary_result)
+    
+    # 生成summary
+    # summary_result = agent.generate_summary(sample_contentdiff)
+    
+    # 打印格式化的JSON结果
+    # print(json.dumps(summary_result, indent=2, ensure_ascii=False))
+
+if __name__ == "__main__":
+    main()

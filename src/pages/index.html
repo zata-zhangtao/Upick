@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Subscription Manager</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        .gradient-bg {
+            background: linear-gradient(90deg, #4f46e5 0%, #7c3aed 100%);
+        }
+        .card {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+        .btn-primary {
+            background: linear-gradient(90deg, #4f46e5 0%, #7c3aed 100%);
+            transition: all 0.3s ease;
+        }
+        .btn-primary:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
+        .tab-active {
+            border-bottom: 2px solid #4f46e5;
+            color: #4f46e5;
+        }
+        .table-row:nth-child(even) {
+            background-color: #f8fafc;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <nav class="gradient-bg text-white p-4 shadow-md">
+        <div class="container mx-auto flex justify-between items-center">
+            <h1 class="text-2xl font-bold">Subscription Manager</h1>
+            <div class="space-x-4">
+                <a href="#" class="hover:underline">Home</a>
+                <a href="#" class="hover:underline">About</a>
+                <a href="#" class="hover:underline">Help</a>
+            </div>
+        </div>
+    </nav>
+    
+    <main class="container mx-auto py-8 px-4">
+        <div class="max-w-4xl mx-auto">
+            <h2 class="text-3xl font-bold text-gray-800 mb-8">Web Content Subscription System</h2>
+            
+            <!-- Tabs -->
+            <div class="flex border-b border-gray-200 mb-8">
+                <button id="addRefreshTab" class="py-3 px-6 font-medium tab-active focus:outline-none">
+                    Add/Refresh
+                </button>
+                <button id="updatesTab" class="py-3 px-6 font-medium text-gray-600 focus:outline-none">
+                    Updates
+                    </button>
+                </div>
+                
+            <!-- Add/Refresh Tab Content -->
+            <div id="addRefreshContent" class="card p-6 mb-8">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    <div>
+                        <label class="block text-gray-700 mb-2" for="urlInput">Subscription URL</label>
+                        <input type="text" id="urlInput" class="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-indigo-500" 
+                            placeholder="https://example.com">
+                    </div>
+                    <div>
+                        <label class="block text-gray-700 mb-2" for="intervalInput">Check Interval (minutes)</label>
+                        <input type="number" id="intervalInput" class="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-indigo-500" 
+                            min="1" value="60">
+                    </div>
+                        </div>
+                
+                <div class="flex gap-4 mb-6">
+                    <button id="addSubscriptionBtn" class="btn-primary text-white px-6 py-3 rounded-lg font-medium">
+                        Add Subscription
+                    </button>
+                    <button id="refreshBtn" class="bg-gray-100 text-gray-800 border border-gray-300 px-6 py-3 rounded-lg font-medium hover:bg-gray-200 transition-colors">
+                        Refresh All
+                    </button>
+                </div>
+                
+                <div id="statusOutput" class="p-4 bg-gray-100 rounded-lg">
+                    <p class="text-gray-600">Status messages will appear here</p>
+                </div>
+            </div>
+            
+            <!-- Updates Tab Content -->
+            <div id="updatesContent" class="card p-6 hidden">
+                <div class="mb-6 flex justify-between items-center">
+                    <h3 class="text-xl font-semibold text-gray-700">Content Updates</h3>
+                    <button id="viewUpdatesBtn" class="btn-primary text-white px-4 py-2 rounded-lg font-medium text-sm">
+                        Refresh Updates
+                    </button>
+                        </div>
+                
+                <div class="overflow-x-auto">
+                    <table class="min-w-full">
+                        <thead>
+                            <tr class="bg-gray-100 border-b border-gray-200">
+                                <th class="py-3 px-4 text-left text-gray-700 font-semibold">URL</th>
+                                <th class="py-3 px-4 text-left text-gray-700 font-semibold">Updated At</th>
+                                <th class="py-3 px-4 text-left text-gray-700 font-semibold">Changes</th>
+                            </tr>
+                        </thead>
+                        <tbody id="updatesTableBody">
+                            <!-- Updates will be populated here -->
+                            <tr class="table-row border-b border-gray-200">
+                                <td class="py-4 px-4 text-gray-800" colspan="3">No updates found. Click "Refresh Updates" to check for new content.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <!-- Active Subscriptions -->
+            <div class="card p-6">
+                <div class="mb-6 flex justify-between items-center">
+                    <h3 class="text-xl font-semibold text-gray-700">Active Subscriptions</h3>
+                    <span class="bg-indigo-100 text-indigo-800 px-3 py-1 rounded-full text-sm">
+                        Total: <span id="subscriptionCount">0</span>
+                    </span>
+                        </div>
+                
+                <div class="overflow-x-auto">
+                    <table class="min-w-full">
+                        <thead>
+                            <tr class="bg-gray-100 border-b border-gray-200">
+                                <th class="py-3 px-4 text-left text-gray-700 font-semibold">URL</th>
+                                <th class="py-3 px-4 text-left text-gray-700 font-semibold">Interval (min)</th>
+                                <th class="py-3 px-4 text-left text-gray-700 font-semibold">Last Checked</th>
+                                <th class="py-3 px-4 text-left text-gray-700 font-semibold">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="subscriptionsTableBody">
+                            <!-- Subscriptions will be populated here -->
+                            <tr class="table-row border-b border-gray-200">
+                                <td class="py-4 px-4 text-gray-800" colspan="4">No active subscriptions. Add one using the form above.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+        </div>
+    </main>
+    
+    <footer class="bg-gray-800 text-white py-6 mt-12">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="mb-4 md:mb-0">
+                    <h3 class="text-xl font-bold">Subscription Manager</h3>
+                    <p class="text-gray-400">© 2023 All rights reserved</p>
+                </div>
+                <div class="flex space-x-4">
+                    <a href="#" class="hover:text-indigo-400 transition-colors">Documentation</a>
+                    <a href="#" class="hover:text-indigo-400 transition-colors">GitHub</a>
+                    <a href="#" class="hover:text-indigo-400 transition-colors">Support</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Tab switching
+        const addRefreshTab = document.getElementById('addRefreshTab');
+        const updatesTab = document.getElementById('updatesTab');
+        const addRefreshContent = document.getElementById('addRefreshContent');
+        const updatesContent = document.getElementById('updatesContent');
+        
+        addRefreshTab.addEventListener('click', function() {
+            addRefreshTab.classList.add('tab-active');
+            addRefreshTab.classList.remove('text-gray-600');
+            updatesTab.classList.remove('tab-active');
+            updatesTab.classList.add('text-gray-600');
+            
+            addRefreshContent.classList.remove('hidden');
+            updatesContent.classList.add('hidden');
+        });
+        
+        updatesTab.addEventListener('click', function() {
+            updatesTab.classList.add('tab-active');
+            updatesTab.classList.remove('text-gray-600');
+            addRefreshTab.classList.remove('tab-active');
+            addRefreshTab.classList.add('text-gray-600');
+            
+            updatesContent.classList.remove('hidden');
+            addRefreshContent.classList.add('hidden');
+        });
+        
+        // Form submission handling
+        const addSubscriptionBtn = document.getElementById('addSubscriptionBtn');
+        const refreshBtn = document.getElementById('refreshBtn');
+        const viewUpdatesBtn = document.getElementById('viewUpdatesBtn');
+        const statusOutput = document.getElementById('statusOutput');
+        
+        // Simulated data storage
+        let subscriptions = [];
+        let updates = [];
+        
+        // Add subscription
+        addSubscriptionBtn.addEventListener('click', function() {
+            const urlInput = document.getElementById('urlInput');
+            const intervalInput = document.getElementById('intervalInput');
+            
+            const url = urlInput.value.trim();
+            const interval = parseInt(intervalInput.value);
+            
+            if (!url) {
+                showStatus('Please enter a valid URL', 'error');
+                return;
+            }
+            
+            if (isNaN(interval) || interval < 1) {
+                showStatus('Interval must be at least 1 minute', 'error');
+                return;
+            }
+            
+            // Simulate adding to database
+            const subscription = {
+                id: Date.now(),
+                url: url,
+                interval: interval,
+                lastChecked: new Date().toISOString()
+            };
+            
+            subscriptions.push(subscription);
+            updateSubscriptionList();
+            
+            // Clear form and show success message
+            urlInput.value = '';
+            showStatus(`Successfully added subscription to ${url}`, 'success');
+        });
+        
+        // Refresh content
+        refreshBtn.addEventListener('click', function() {
+            if (subscriptions.length === 0) {
+                showStatus('No subscriptions to refresh', 'warning');
+                return;
+            }
+            
+            // Simulate refreshing
+            showStatus('Refreshing content...', 'info');
+            
+            setTimeout(() => {
+                // Update last checked time
+                subscriptions.forEach(sub => {
+                    sub.lastChecked = new Date().toISOString();
+                    
+                    // Randomly generate some updates for demo purposes
+                    if (Math.random() > 0.5) {
+                        updates.push({
+                            url: sub.url,
+                            updatedAt: new Date().toISOString(),
+                            changes: `Changed ${Math.floor(Math.random() * 10) + 1} elements`
+                        });
+                    }
+                });
+                
+                updateSubscriptionList();
+                showStatus('Content refreshed successfully', 'success');
+            }, 1500);
+        });
+        
+        // View updates
+        viewUpdatesBtn.addEventListener('click', function() {
+            updateUpdatesList();
+            
+            if (updates.length === 0) {
+                showStatus('No updates found', 'info');
+                } else {
+                showStatus(`Found ${updates.length} updates`, 'success');
+            }
+        });
+        
+        // Helper functions
+        function showStatus(message, type = 'info') {
+            let bgColor = 'bg-blue-100 text-blue-800';
+            
+            if (type === 'success') {
+                bgColor = 'bg-green-100 text-green-800';
+            } else if (type === 'error') {
+                bgColor = 'bg-red-100 text-red-800';
+            } else if (type === 'warning') {
+                bgColor = 'bg-yellow-100 text-yellow-800';
+            }
+            
+            statusOutput.className = `p-4 rounded-lg ${bgColor}`;
+            statusOutput.innerHTML = `<p>${message}</p>`;
+        }
+        
+        function updateSubscriptionList() {
+            const tbody = document.getElementById('subscriptionsTableBody');
+            const count = document.getElementById('subscriptionCount');
+            
+            count.textContent = subscriptions.length;
+            
+            if (subscriptions.length === 0) {
+                tbody.innerHTML = `
+                    <tr class="table-row border-b border-gray-200">
+                        <td class="py-4 px-4 text-gray-800" colspan="4">No active subscriptions. Add one using the form above.</td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            tbody.innerHTML = '';
+            
+            subscriptions.forEach(sub => {
+                const tr = document.createElement('tr');
+                tr.className = 'table-row border-b border-gray-200';
+                
+                const dateFormatted = new Date(sub.lastChecked).toLocaleString();
+                
+                tr.innerHTML = `
+                    <td class="py-4 px-4 text-gray-800 break-all">${sub.url}</td>
+                    <td class="py-4 px-4 text-gray-800">${sub.interval}</td>
+                    <td class="py-4 px-4 text-gray-800">${dateFormatted}</td>
+                    <td class="py-4 px-4">
+                        <button class="text-red-600 hover:text-red-800" data-id="${sub.id}">
+                            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                            </svg>
+                        </button>
+                    </td>
+                `;
+                
+                tbody.appendChild(tr);
+                
+                // Add delete listener
+                const deleteBtn = tr.querySelector('button');
+                deleteBtn.addEventListener('click', function() {
+                    const id = parseInt(this.getAttribute('data-id'));
+                    subscriptions = subscriptions.filter(s => s.id !== id);
+                    updateSubscriptionList();
+                    showStatus('Subscription removed', 'info');
+                });
+            });
+        }
+        
+        function updateUpdatesList() {
+            const tbody = document.getElementById('updatesTableBody');
+            
+            if (updates.length === 0) {
+                tbody.innerHTML = `
+                    <tr class="table-row border-b border-gray-200">
+                        <td class="py-4 px-4 text-gray-800" colspan="3">No updates found. Click "Refresh Updates" to check for new content.</td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            tbody.innerHTML = '';
+            
+            updates.forEach(update => {
+                const tr = document.createElement('tr');
+                tr.className = 'table-row border-b border-gray-200';
+                
+                const dateFormatted = new Date(update.updatedAt).toLocaleString();
+                
+                tr.innerHTML = `
+                    <td class="py-4 px-4 text-gray-800 break-all">${update.url}</td>
+                    <td class="py-4 px-4 text-gray-800">${dateFormatted}</td>
+                    <td class="py-4 px-4 text-gray-800">${update.changes}</td>
+                `;
+                
+                tbody.appendChild(tr);
+            });
+        }
+    </script>
+</body>
+</html>

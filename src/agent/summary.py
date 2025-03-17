@@ -1,120 +1,136 @@
 from datetime import datetime
-from langchain.prompts import PromptTemplate
-from langchain_core.runnables import RunnableSequence
-from langchain.chains import LLMChain, SequentialChain
-from langchain_core.output_parsers.json import SimpleJsonOutputParser
+import time
+from langchain_core.prompts import PromptTemplate
+from langchain_core.output_parsers import PydanticOutputParser
 import json
+import re
+from pydantic import BaseModel, Field
+from typing import List, Optional
+
+# 假设的 LLM 获取函数（需要根据你的实际环境调整）
 from src.agent.llm import get_ali_llm
 
-# 定义固定的summary JSON格式模板
-SUMMARY_TEMPLATE = {
-    "summary": {
-        "content": [],
-        "key_points": [],
-        "word_count": 0,
-        "generated_at": ""
-    },
-    "status": "success",
-    "error_message": None
-}
+# 定义 Pydantic 模型用于输出解析
+class SummaryResponse(BaseModel):
+    content: List[str] = Field(default_factory=list, description="内容更新概要")
+    key_points: List[str] = Field(default_factory=list, description="关键点列表")
+    word_count: int = Field(default=0, description="内容字数统计")
+    generated_at: str = Field(default="", description="生成时间")
+    status: str = Field(default="success", description="处理状态")
+    error_message: Optional[str] = Field(default=None, description="错误信息")
+    raw_response: Optional[str] = Field(default=None, description="原始响应")
 
 class SubscriptionAgent:
-    def __init__(self, llm_model=None):
-        # 初始化LLM，如果没有传入特定模型，使用默认配置
-        self.llm = llm_model if llm_model else get_ali_llm("qwen-7b-chat")
-
+    def __init__(self, llm_model=None, max_retries=3, retry_delay=2):
+        # 初始化 LLM，如果没有传入特定模型，使用默认配置
+        self.llm = llm_model if llm_model else get_ali_llm("qwq-32b")
+        self.max_retries = max_retries  # 最大重试次数
+        self.retry_delay = retry_delay  # 重试间隔时间（秒）
         
-        # 定义提示模板
+        # 定义 Pydantic 输出解析器
+        self.parser = PydanticOutputParser(pydantic_object=SummaryResponse)
+        
+        # 定义提示模板，进一步优化以确保提取 key_points
         self.prompt_template = PromptTemplate(
             input_variables=["contentdiff"],
+            partial_variables={"format_instructions": self.parser.get_format_instructions()},
             template="""
-            你是一个订阅号运营专家，可以根据差异内容总结出订阅内容的更新情况，请对以下内容差异进行总结：
+            你是一个订阅号运营专家，可以根据差异内容总结出订阅内容的更新情况。请对以下内容差异进行总结：
             {contentdiff}
 
-            注意，有些内容的可能仅仅是时间或者数据的变化，这样的内容更新是不需要总结的，可以看作没有更新，返回空数组
-
-            要求：
-            1. 提供简洁的内容更新概要
-            2. 提取关键点
-            3. 计算内容的列表长度
-            返回结果使用中文,如果内容更新或者没有关键点，请返回空数组。
-            请根据以上要求，总结出订阅内容的更新情况，并返回结果。
-            
-
-            返回格式json（请严格按照以下格式返回）：
-            {{
-                "summary": {{
-                    "content": [],
-                    "key_points": [],
-                    "word_count": 0,
-                    "generated_at": ""
-                }},
-            }}
-            
-
+            ###注意，有些内容的可能仅仅是时间或者数据的变化，这样的内容更新是不需要总结的，可以看作没有更新，返回空数组
+            ###注意：content和key_points的列表长度应当一致，也就是他们是一一对应关系
+            ###要求：
+            1. 提供内容更新概要（content），用数组形式返回。
+            2. 提取每个内容的关键点（key_points），每个关键点应简洁且突出重点。
+            3. 计算 content 字段的总字数（仅统计中文和英文字符，不包括标点和空格）。
+            4. 返回结果使用中文，如果没有实质性更新或关键点，返回空数组。
+            5. 严格按照以下 JSON 格式返回结果，不添加任何多余的说明文字或注释：
+            {format_instructions}
             """
         )
-        
-        # 创建LLM链
-        self.chain = self.prompt_template | self.llm 
 
 
 
-    def generate_summary(self, contentdiff: str) -> dict:
+    def extract_json(self, raw_content: str) -> str:
+        """从原始响应中提取 JSON 字符串"""
+        json_match = re.search(r'\{.*\}', raw_content, re.DOTALL)
+        return json_match.group(0) if json_match else raw_content
+
+    def generate_summary(self, contentdiff: str) -> SummaryResponse:
         """
-        生成summary的主函数
+        生成 summary 的主函数
         参数:
             contentdiff: 输入的内容差异文本
         返回:
-            dict: 固定格式的JSON结果
+            SummaryResponse: 包含摘要内容的 Pydantic 模型
         """
-        try:
-            # 执行LLM链获取结果，输入需要是字典格式
-            result = self.chain.invoke({"contentdiff": contentdiff}).content
-            print("result: ", result)
-            # 解析结果（假设LLM返回的是JSON字符串）
-    
-            # 假设返回的是JSON格式字符串，尝试解析
-            parsed_result = json.loads(result)
-            summary_content = parsed_result["summary"]["content"]
-            key_points = parsed_result["summary"]["key_points"]
-            word_count = parsed_result["summary"]["word_count"]
-            generated_at = parsed_result["summary"]["generated_at"]
-    
+        retries = 0
+        last_exception = None
+        raw_response = None
+        
+        while retries < self.max_retries:
+            try:
+                # 执行 LLM 调用获取原始响应
+                chain = self.prompt_template | self.llm
+                raw_response = chain.invoke({"contentdiff": contentdiff})
+                
+                # 检查并提取原始内容
+                raw_content = raw_response.content if hasattr(raw_response, 'content') else str(raw_response)
+                json_content = self.extract_json(raw_content)
+                
+                # 尝试解析响应
+                response = self.parser.parse(json_content)
+                
+                # 确保生成时间字段有值
+                if not response.generated_at:
+                    response.generated_at = datetime.now().isoformat()
+                
+                # 计算字数（如果 LLM 未提供，则基于 content 计算）
+                if response.word_count == 0 and response.content:
+                    response.word_count = len("".join(response.content).replace(" ", "").replace(",", "").replace(".", ""))
+                
+                # 添加原始响应到结果中
+                response.raw_response = raw_content
+                
+                return response
 
-            # 创建响应对象
-            response = SUMMARY_TEMPLATE.copy()
-            response["summary"]["content"] = summary_content
-            response["summary"]["key_points"] = key_points
-            response["summary"]["word_count"] = word_count
-            response["summary"]["generated_at"] = generated_at
+            except Exception as e:
+                last_exception = e
+                retries += 1
+                if retries < self.max_retries:
+                    time.sleep(self.retry_delay)
+                    continue
+        
+        # 所有重试都失败后，返回错误响应
+        raw_content = raw_response.content if raw_response and hasattr(raw_response, 'content') else str(raw_response) if raw_response else "No response"
+        return SummaryResponse(
+            content=[],
+            key_points=[],
+            word_count=0,
+            generated_at=datetime.now().isoformat(),
+            status="error",
+            error_message=f"Failed to parse SummaryResponse: {str(last_exception)}",
+            raw_response=raw_content
+        )
 
-            return response
-
-        except Exception as e:
-            # 错误处理
-            error_response = SUMMARY_TEMPLATE.copy()
-            error_response["status"] = "error"
-            error_response["error_message"] = f"Error on line {e.__traceback__.tb_lineno}: {str(e)}"
-            return error_response
 # 使用示例
 def main():
-    # 创建示例contentdiff
+    # 创建示例 contentdiff，确保包含可提取的关键点
     sample_contentdiff = """
-    Original: The quick brown fox jumps over the lazy dog.
-    Updated: The swift brown fox leaps over the idle dog quickly.
+"[""Changed: '1' -> '2  分钟前\n.\nAIbase\nFlower Labs 颠覆AI应用模式，2360万美元打造首个全开放混合计算平台\n人工智能正在以前所未有的速度融入我们的日常应用，而一家名为Flower Labs的初创公司正以革命性的方式改变AI模型的部署和运行方式。这家获得Y Combinator支持的新锐企业近日推出了Flower Intelligence，一个创新的分布式云平台，专为在移动设备、个人电脑和网络应用中提供AI模型服务而设计。Flower Intelligence的核心优势在于其独特的混合计算策略。该平台允许应用程序在本地设备上运行AI模型，既保证了速度，又增强了隐私保护。当需要更强大的计算能力时，系统会在获得用户同意的情况下，无\n7'"", ""Added: '美国埃隆大学的一项调查显示，5'"", ""Added: '%的美国成年人都曾使用过像ChatGPT、Gemini、Claude这样的AI大语言模型。这项由北卡罗来纳州埃隆大学“想象数字未来中心”在'"", ""Added: '月份开展的调查，选取了500名受访者。结果发现，在使用过AI的人群中，34%的人表示至少每天会使用一次大语言模型。其中，ChatGPT最受欢迎，72%的受访者都用过;谷歌的Gemini位居第二，使用率为50% 。图源备注：图片由AI生成，图片授权服务商Midjourney越来越多的人开始和AI聊天机器人建立起特殊的关系。调查显示，38%的用户认为大语言模\n27'"", ""Changed: '3' -> '9'"", ""Changed: '49' -> '55'"", ""Changed: '1' -> '2'"", ""Deleted: '\n2  小时前\n.\nAIbase\n叫板Sora？潞晨科技开源视频大模型Open-Sora 2.0，降本提速\n听说过壕无人性的 OpenAI Sora 吧?动辄几百万美元的训练成本，简直就是视频生成界的“劳斯莱斯”。现在，潞晨科技宣布开源视频生成模型 Open-Sora2.0!仅仅花费了区区20万美元（相当于224张 GPU 的投入），就成功训练出了一个拥有 110亿参数的商业级视频生成大模型。性能直追“OpenAI Sora ”别看 Open-Sora2.0成本不高，实力可一点都不含糊。它可是敢于叫板行业标杆 HunyuanVideo 和拥有300亿参数的 Step-Video 的狠角色。在权威评测 VBench 和用户偏好测试中，Open-Sora2.0的表现都令人刮目相看，多项关键指'""]"
+
     """
     
     # 初始化智能体
-    agent = SubscriptionAgent()
+    agent = SubscriptionAgent(max_retries=3, retry_delay=2)
     summary_result = agent.generate_summary(sample_contentdiff)
-    print(summary_result)
     
-    # 生成summary
-    # summary_result = agent.generate_summary(sample_contentdiff)
-    
-    # 打印格式化的JSON结果
-    # print(json.dumps(summary_result, indent=2, ensure_ascii=False))
+    # 打印调试信息
+    # print("Raw response:", summary_result.raw_response)
+    # print("Error message:", summary_result.error_message)
+    # print("Summary result:")
+    print(json.dumps(summary_result.model_dump(), indent=2, ensure_ascii=False))
 
 if __name__ == "__main__":
     main()
