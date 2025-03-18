@@ -1,123 +1,176 @@
+import gradio as gr
+import sqlite3
 from datetime import datetime
-from langchain.prompts import PromptTemplate
-from langchain_core.runnables import RunnableSequence
-from langchain.chains import LLMChain, SequentialChain
-from langchain_core.output_parsers.json import SimpleJsonOutputParser
+from src.db import add_subscription, refresh_content, get_updates
 import json
-from src.agent.llm import get_ali_llm
+from src.log import get_logger
+logger = get_logger("pages.gradio_page")
 
-# 定义固定的summary JSON格式模板
-SUMMARY_TEMPLATE = {
-    "summary": {
-        "content": [],
-        "key_points": [],
-        "word_count": 0,
-        "generated_at": ""
-    },
-    "status": "success",
-    "error_message": None
-}
-
-class SubscriptionAgent:
-    def __init__(self, llm_model=None):
-        # 初始化LLM，如果没有传入特定模型，使用默认配置
-        self.llm = llm_model if llm_model else get_ali_llm("qwq-32b")
-
+def create_ui():
+    """Create Gradio interface for subscription management"""
+    with gr.Blocks(css="""
+        # ... (保持原有的 CSS 不变)
+    """) as app:
+        gr.Markdown("# Subscription Manager")
         
-        # 定义提示模板
-        self.prompt_template = PromptTemplate(
-            input_variables=["contentdiff"],
-            template="""
-            你是一个订阅号运营专家，可以根据差异内容总结出订阅内容的更新情况，请对以下内容差异进行总结：
-            {contentdiff}
+        with gr.Tabs():
+            with gr.Tab("Add/Refresh"):
+                # ... (保持原有的 Add/Refresh 标签页内容不变)
+                
 
-            注意，有些内容的可能仅仅是时间或者数据的变化，这样的内容更新是不需要总结的，可以看作没有更新，返回空数组
 
-            要求：
-            1. 提供简洁的内容更新概要
-            2. 提取关键点
-            3. 计算内容的列表长度
-            返回结果使用中文,如果内容更新或者没有关键点，请返回空数组。
-            请根据以上要求，总结出订阅内容的更新情况，并返回结果。
+
+
+
+
+
+
+
+
+            
+            with gr.Tab("Updates"):
+                with gr.Row():
+                    time_range = gr.Dropdown(
+                        choices=["最近1小时", "最近24小时", "最近7天", "最近30天", "全部"],
+                        label="显示时间范围",
+                        value="最近24小时"
+                    )
+                    view_btn = gr.Button("View Updates", variant="primary")
+                
+                updates_container = gr.HTML(label="Content Updates")
+                
+                def format_updates_as_cards(updates_data):
+                    if not updates_data or len(updates_data) == 0:
+                        return """
+                        <div class='empty-state'>
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+                            </svg>
+                            <h3 class="text-lg font-medium mb-2">No updates found</h3>
+                            <p>Click "Refresh Updates" to check for new content.</p>
+                        </div>
+                        """
+                    
+                    html = "<div class='updates-container'>"
+                    for update in updates_data:
+                        if isinstance(update, (list, tuple)) and len(update) >= 3:
+                            url = update[0]
+                            updated_at = update[1]
+                            try:
+                                changes = json.loads(update[2]) if isinstance(update[2], (str, bytes, bytearray)) else {}
+                            except json.JSONDecodeError:
+                                changes = {'key_points': update[2]}
+                            
+                            date_formatted = updated_at
+                            if isinstance(updated_at, str):
+                                try:
+                                    date_formatted = datetime.fromisoformat(updated_at).strftime("%Y-%m-%d %H:%M:%S")
+                                except ValueError:
+                                    pass
+                            
+                            content = changes.get('key_points', '')
+                            if isinstance(content, list):
+                                content_html = '<ol>' + ''.join([f'<li>{point}</li>' for point in content]) + '</ol>'
+                            else:
+                                content_html = content
+                            
+                            html += f"""
+                            <div class='card'>
+                                <div class='card-header'>
+                                    <a href="{url}" target="_blank" title="Visit original page">{url}</a>
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" viewBox="0 0 16 16" style="display: inline-block; vertical-align: middle; margin-left: 5px;">
+                                        <path fill-rule="evenodd" d="M8.636 3.5a.5.5 0 0 0-.5-.5H1.5A1.5 1.5 0 0 0 0 4.5v10A1.5 1.5 0 0 0 1.5 16h10a1.5 1.5 0 0 0 1.5-1.5V7.864a.5.5 0 0 0-1 0V14.5a.5.5 0 0 1-.5.5h-10a.5.5 0 0 1-.5-.5v-10a.5.5 0 0 1 .5-.5h6.636a.5.5 0 0 0 .5-.5z"/>
+                                        <path fill-rule="evenodd" d="M16 .5a.5.5 0 0 0-.5-.5h-5a.5.5 0 0 0 0 1h3.793L6.146 9.146a.5.5 0 1 0 .708.708L15 1.707V5.5a.5.5 0 0 0 1 0v-5z"/>
+                                    </svg>
+                                </div>
+                                <div class='card-body'>
+                                    <div class='timestamp'>
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                            <path d="M8 3.5a.5.5 0 0 0-1 0V9a.5.5 0 0 0 .252.434l3.5 2a.5.5 0 0 0 .496-.868L8 8.71V3.5z"/>
+                                            <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm7-8A7 7 0 1 1 1 8a7 7 0 0 1 14 0z"/>
+                                        </svg>
+                                        {date_formatted}
+                                    </div>
+                                    <div class='content'>
+                                        {content_html}
+                                    </div>
+                                </div>
+                            </div>
+                            """
+                    html += "</div>"
+                    return html
+                
+                def get_updates_as_cards(time_range_selection):
+                    from datetime import timedelta
+                    
+                    logger.debug(f"点击获取更新内容 : click get updates with range {time_range_selection}")
+                    
+                    # 根据选择确定时间范围
+                    now = datetime.now()
+                    if time_range_selection == "最近1小时":
+                        time_filter = now - timedelta(hours=1)
+                    elif time_range_selection == "最近24小时":
+                        time_filter = now - timedelta(hours=24)
+                    elif time_range_selection == "最近7天":
+                        time_filter = now - timedelta(days=7)
+                    elif time_range_selection == "最近30天":
+                        time_filter = now - timedelta(days=30)
+                    else:  # "全部"
+                        time_filter = None
+                    
+                    # 获取更新数据
+                    updates_data = get_updates()
+                    
+                    # 过滤时间范围
+                    if time_filter:
+                        filtered_updates = []
+                        for update in updates_data:
+                            if isinstance(update, (list, tuple)) and len(update) >= 2:
+                                updated_at = update[1]
+                                try:
+                                    update_time = datetime.fromisoformat(updated_at)
+                                    if update_time >= time_filter:
+                                        filtered_updates.append(update)
+                                except (ValueError, TypeError):
+                                    continue
+                        updates_data = filtered_updates
+                    
+                    return format_updates_as_cards(updates_data)
+                
+                view_btn.click(
+                    fn=get_updates_as_cards,
+                    inputs=time_range,
+                    outputs=updates_container
+                )
+                
+                # 使时间范围选择实时更新
+                time_range.change(
+                    fn=get_updates_as_cards,
+                    inputs=time_range,
+                    outputs=updates_container
+                )
             
 
-            返回格式json（请严格按照以下格式返回）：
-            {{
-                "summary": {{
-                    "content": [],
-                    "key_points": [],
-                    "word_count": 0,
-                    "generated_at": ""
-                }},
-            }}
+
+
+
+
+
+
+
+
+
+
+
+
+
             
+            with gr.Tab("Schedule Settings"):
+                # ... (保持原有的 Schedule Settings 标签页内容不变)
 
-            """
-        )
-        
-        # 创建LLM链
-        self.chain = self.prompt_template | self.llm 
+    return app
 
-
-
-    def generate_summary(self, contentdiff: str) -> dict:
-        """
-        生成summary的主函数
-        参数:
-            contentdiff: 输入的内容差异文本
-        返回:
-            dict: 固定格式的JSON结果
-        """
-        try:
-            # 执行LLM链获取结果，输入需要是字典格式
-            result = self.chain.invoke({"contentdiff": contentdiff}).content
-            print("result: ", result)
-            # 解析结果（假设LLM返回的是JSON字符串）
-    
-            # 假设返回的是JSON格式字符串，尝试解析
-            parsed_result = json.loads(result)
-            summary_content = parsed_result["summary"]["content"]
-            key_points = parsed_result["summary"]["key_points"]
-            word_count = parsed_result["summary"]["word_count"]
-            generated_at = parsed_result["summary"]["generated_at"]
-    
-
-            # 创建响应对象
-            response = SUMMARY_TEMPLATE.copy()
-            response["summary"]["content"] = summary_content
-            response["summary"]["key_points"] = key_points
-            response["summary"]["word_count"] = word_count
-            response["summary"]["generated_at"] = generated_at
-
-            return response
-
-        except Exception as e:
-            # 错误处理
-            error_response = SUMMARY_TEMPLATE.copy()
-            error_response["status"] = "error"
-            error_response["error_message"] = f"Error on line {e.__traceback__.tb_lineno}: {str(e)}"
-            return error_response
-# 使用示例
-def main():
-    # 创建示例contentdiff
-    # sample_contentdiff = """
-    # Original: The quick brown fox jumps over the lazy dog.
-    # Updated: The swift brown fox leaps over the idle dog quickly.
-    # """
-
-    sample_contentdiff = input("请输入内容差异: ")
-    
-    
-    # 初始化智能体
-    agent = SubscriptionAgent()
-    summary_result = agent.generate_summary(sample_contentdiff)
-    print(summary_result)
-    
-    # 生成summary
-    # summary_result = agent.generate_summary(sample_contentdiff)
-    
-    # 打印格式化的JSON结果
-    # print(json.dumps(summary_result, indent=2, ensure_ascii=False))
-
+# Create and launch the interface
+app = create_ui()
 if __name__ == "__main__":
-    main()
+    app.launch()

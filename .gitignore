@@ -1,4 +1,4 @@
 *.pyc
 *.env
 *.pyc
-
+logs/app.log

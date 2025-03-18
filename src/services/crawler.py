@@ -67,4 +67,4 @@ class WebCrawler:
 if __name__ == "__main__":
     crawler = WebCrawler()
     url = "https://www.aibase.com/zh/daily"
-    print(crawler.fetch_and_clean_content(url))
+    # print(crawler.fetch_and_clean_content(url))

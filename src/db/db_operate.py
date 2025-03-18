@@ -1,7 +1,10 @@
 from typing import List,Tuple
 import sqlite3
 from src.agent import SubscriptionAgent
+from src.log import get_logger
 
+
+logger = get_logger("db.db_operate")
 
 SUBSCRIPTIONS_DB_PATH = 'resources\database\subscriptions.db'
 
@@ -49,8 +52,16 @@ def add_subscription(url, check_interval):
         conn.close()
         return f"Successfully added subscription and fetched initial content: {url} : {content}"
 
-def refresh_content():
-    """Refresh content for all subscriptions that need updating based on check_interval"""
+def refresh_content(similarity_threshold:float=0.95)->str:
+    """Refresh content for all subscriptions that need updating based on check_interval
+
+    Args:
+        similarity_threshold (float): The threshold for similarity.
+        default is 0.95
+    Returns:
+        str: A message indicating the number of subscriptions that were refreshed.
+
+    """
     from src.services.crawler import WebCrawler
     from datetime import datetime, timedelta
     from src.services.contentdiff import get_content_diff, has_significant_changes
@@ -70,8 +81,7 @@ def refresh_content():
     crawler = WebCrawler()
     updated_count = 0
     
-    
-    # 
+    # 遍历所有订阅  "Traverse all subscriptions"
     for sub_id, url, last_updated, interval in subscriptions:
         last_updated = datetime.strptime(last_updated, '%Y-%m-%d %H:%M:%S')
         time_diff = current_time - last_updated
@@ -100,15 +110,18 @@ def refresh_content():
             
             # Calculate differences and store in content_updates
             similarity, diffs = get_content_diff(old_content, new_content)
-            summary = SubscriptionAgent().generate_summary(diffs)
-            print(summary)
-            c.execute("""
-                INSERT INTO content_updates 
-                (subscription_id, old_content_id, new_content_id, similarity_ratio, diff_details, summary)
-                VALUES (?, ?, ?, ?, ?, ?)
-            """, (sub_id, old_content_id, new_content_id, similarity, json.dumps(diffs,ensure_ascii=False), json.dumps(summary.model_dump(),ensure_ascii=False)))
             
-            # Update last_updated_at timestamp
+            # 如果相似度低于阈值，则生成摘要   if similarity is less than the threshold, generate a summary
+            if similarity < similarity_threshold and len(diffs)>0:
+                summary = SubscriptionAgent().generate_summary(diffs)
+                logger.debug(f"生成摘要: {summary}")
+                c.execute("""
+                    INSERT INTO content_updates 
+                    (subscription_id, old_content_id, new_content_id, similarity_ratio, diff_details, summary)
+                    VALUES (?, ?, ?, ?, ?, ?)
+                """, (sub_id, old_content_id, new_content_id, similarity, json.dumps(diffs,ensure_ascii=False), json.dumps(summary.model_dump(),ensure_ascii=False)))
+            
+            # 更新最后检查时间,无论是否生成摘要  "Update last_updated_at timestamp, whether a summary is generated or not"
             c.execute("""
                 UPDATE subscriptions 
                 SET last_updated_at = ? 
