@@ -1,17 +1,27 @@
+import os
+import sqlite3
+from .db_operate import add_subscription, refresh_content, get_updates
+
+from .config import SUBSCRIPTIONS_DB_PATH
+
+
 
 __all__ = [
     "add_subscription",
     "refresh_content",
-    "get_updates"
+    "get_updates",
+    "SUBSCRIPTIONS_DB_PATH"
 ]
 
-from .db_operate import add_subscription, refresh_content, get_updates
 
-import sqlite3
+
+
+
+
 
 def init_db():
     """Initialize SQLite database with subscription and content tables"""
-    conn = sqlite3.connect('resources\database\subscriptions.db')
+    conn = sqlite3.connect(SUBSCRIPTIONS_DB_PATH)
     c = conn.cursor()
     
     # Enable timezone support

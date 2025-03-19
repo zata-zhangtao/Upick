@@ -2,16 +2,23 @@ from typing import List,Tuple
 import sqlite3
 from src.agent import SubscriptionAgent
 from src.log import get_logger
-
-
+from src.services.crawler import WebCrawler
+from datetime import datetime
+from .config import SUBSCRIPTIONS_DB_PATH
 logger = get_logger("db.db_operate")
 
-SUBSCRIPTIONS_DB_PATH = 'resources\database\subscriptions.db'
 
-def add_subscription(url, check_interval):
-    """Add new subscription to database and fetch initial content or update check interval if URL exists"""
-    from src.services.crawler import WebCrawler
-    from datetime import datetime
+
+
+
+def add_subscription(url:str, check_interval:int)->str:
+    """添加订阅   Add new subscription to database and fetch initial content or update check interval if URL exists
+    Args:
+        url (str): The URL of the subscription.
+        check_interval (int): The interval in minutes between checks.
+    Returns:
+        str: A message indicating the result of the operation.
+    """
 
     conn = sqlite3.connect(SUBSCRIPTIONS_DB_PATH)
     c = conn.cursor()
@@ -53,7 +60,7 @@ def add_subscription(url, check_interval):
         return f"Successfully added subscription and fetched initial content: {url} : {content}"
 
 def refresh_content(similarity_threshold:float=0.95)->str:
-    """Refresh content for all subscriptions that need updating based on check_interval
+    """ 刷新内容,根据订阅的url  Refresh content for all subscriptions that need updating based on check_interval
 
     Args:
         similarity_threshold (float): The threshold for similarity.
@@ -75,40 +82,40 @@ def refresh_content(similarity_threshold:float=0.95)->str:
         SELECT id, url, last_updated_at, check_interval 
         FROM subscriptions
     """)
-    subscriptions = c.fetchall()
+    subscriptions = c.fetchall() # 获取所有订阅 主要是url  Get all subscriptions
     
-    current_time = datetime.now()
-    crawler = WebCrawler()
-    updated_count = 0
+    current_time = datetime.now() # 当前时间  Current time
+    crawler = WebCrawler() # 爬虫对象  WebCrawler object
+    updated_count = 0 # 更新计数  Update count
     
-    # 遍历所有订阅  "Traverse all subscriptions"
+    # 遍历所有订阅  Traverse all subscriptions
     for sub_id, url, last_updated, interval in subscriptions:
-        last_updated = datetime.strptime(last_updated, '%Y-%m-%d %H:%M:%S')
-        time_diff = current_time - last_updated
+        last_updated = datetime.strptime(last_updated, '%Y-%m-%d %H:%M:%S') # 将last_updated转换为datetime对象  Convert last_updated to datetime object
+        time_diff = current_time - last_updated # 计算时间差  Calculate time difference
         
-        # Check if enough time has passed (interval is in minutes)
-        if time_diff > timedelta(minutes=interval):
-            # Get most recent content for this subscription
+        # 检查是否足够时间  Check if enough time has passed (interval is in minutes)
+        if time_diff > timedelta(minutes=interval): # 如果时间差大于间隔时间  If the time difference is greater than the interval
+            # 获取最新内容  Get most recent content for this subscription
             c.execute("""
                 SELECT id, content FROM contents 
                 WHERE subscription_id = ? 
                 ORDER BY fetched_at DESC LIMIT 1
             """, (sub_id,))
-            old_content_row = c.fetchone()
-            old_content_id = old_content_row[0]
-            old_content = old_content_row[1]
+            old_content_row = c.fetchone() # 获取最新内容  Get most recent content for this subscription
+            old_content_id = old_content_row[0] # 获取内容id  Get content id
+            old_content = old_content_row[1] # 获取内容  Get content
             
-            # Fetch new content
+            # 获取新内容  Fetch new content
             new_content = crawler.fetch_and_clean_content(url)
             
-            # Store new content
+            # 存储新内容  Store new content
             c.execute("""
                 INSERT INTO contents (subscription_id, content) 
                 VALUES (?, ?)
             """, (sub_id, new_content))
-            new_content_id = c.lastrowid
+            new_content_id = c.lastrowid # 获取新内容id  Get new content id
             
-            # Calculate differences and store in content_updates
+            # 计算差异并存储在content_updates中  Calculate differences and store in content_updates
             similarity, diffs = get_content_diff(old_content, new_content)
             
             # 如果相似度低于阈值，则生成摘要   if similarity is less than the threshold, generate a summary
@@ -136,15 +143,14 @@ def refresh_content(similarity_threshold:float=0.95)->str:
     return f"Successfully refreshed content for {updated_count} "
 
 def get_updates() -> List[Tuple[str, str, str, str]]:
-    """
-    Get content updates from database.
+    """ 获取内容更新  Get content updates from database.
     
     Returns:
         List[List[str, str, str, str]]: A list of updates, where each update contains
                                         [url, updated_at, summary, diff_details]
     """
     # Connect to database
-    conn = sqlite3.connect('resources/database/subscriptions.db')
+    conn = sqlite3.connect(SUBSCRIPTIONS_DB_PATH)
     c = conn.cursor()
     
     # Query for content updates joined with subscription information
