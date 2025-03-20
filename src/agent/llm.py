@@ -11,6 +11,13 @@ logger = get_logger("agent.llm")
 load_dotenv()
 
 def get_ali_llm(model="qwq-32b"):
+    """
+    获取阿里云的LLM模型
+    Args:
+        model: 模型名称
+    Returns:
+        ChatOpenAI: 阿里云的LLM模型
+    """
 
     return ChatOpenAI(
         api_key=os.getenv("DASHSCOPE_API_KEY"),

@@ -6,6 +6,8 @@ import json
 import re
 from pydantic import BaseModel, Field
 from typing import List, Optional
+from src.log import get_logger
+logger = get_logger("agent.summary")
 
 # 假设的 LLM 获取函数（需要根据你的实际环境调整）
 from src.agent.llm import get_ali_llm
@@ -22,6 +24,12 @@ class SummaryResponse(BaseModel):
 
 class SubscriptionAgent:
     def __init__(self, llm_model=None, max_retries=3, retry_delay=2):
+        """
+        Args:
+            llm_model: 可选的 LLM 模型，如果为 None，则使用默认配置
+            max_retries: 最大重试次数
+            retry_delay: 重试间隔时间（秒）
+        """
         # 初始化 LLM，如果没有传入特定模型，使用默认配置
         self.llm = llm_model if llm_model else get_ali_llm("qwq-32b")
         self.max_retries = max_retries  # 最大重试次数
@@ -53,7 +61,12 @@ class SubscriptionAgent:
 
 
     def extract_json(self, raw_content: str) -> str:
-        """从原始响应中提取 JSON 字符串"""
+        """从原始响应中提取 JSON 字符串 extract JSON string from raw response
+        Args:
+            raw_content: 原始响应内容
+        Returns:
+            str: 提取的 JSON 字符串
+        """
         json_match = re.search(r'\{.*\}', raw_content, re.DOTALL)
         return json_match.group(0) if json_match else raw_content
 
@@ -65,6 +78,7 @@ class SubscriptionAgent:
         返回:
             SummaryResponse: 包含摘要内容的 Pydantic 模型
         """
+        logger.debug(f"正在生成摘要...")
         retries = 0
         last_exception = None
         raw_response = None
@@ -92,10 +106,12 @@ class SubscriptionAgent:
                 
                 # 添加原始响应到结果中
                 response.raw_response = raw_content
+                logger.debug(f"摘要生成成功")
                 
                 return response
 
             except Exception as e:
+                logger.error(f"摘要生成失败: {e}")
                 last_exception = e
                 retries += 1
                 if retries < self.max_retries:
@@ -104,6 +120,7 @@ class SubscriptionAgent:
         
         # 所有重试都失败后，返回错误响应
         raw_content = raw_response.content if raw_response and hasattr(raw_response, 'content') else str(raw_response) if raw_response else "No response"
+        logger.error(f"摘要生成重试全部失败，返回错误响应: {str(last_exception)}")
         return SummaryResponse(
             content=[],
             key_points=[],

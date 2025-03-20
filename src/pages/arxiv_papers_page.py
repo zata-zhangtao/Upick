@@ -257,7 +257,7 @@ def create_ui():
                 # Quick fetch buttons
                 def fetch_category_papers(category_code):
                     crawler = ArxivCrawler()
-                    url = f"https://arxiv.org/list/{category_code}/recent"
+                    url = f"https://arxiv.org/list/{category_code}/new"
                     papers = crawler.crawl(url)
                     if papers:
                         save_papers(papers, category_code)
