@@ -1,0 +1,177 @@
+.container {
+  padding: 30rpx;
+}
+
+.page-header {
+  display: flex;
+  align-items: center;
+  padding: 20rpx 0 40rpx;
+}
+
+.back-btn {
+  font-size: 28rpx;
+  color: #3b82f6;
+  margin-right: 20rpx;
+}
+
+.page-title {
+  font-size: 36rpx;
+  font-weight: bold;
+  color: #333;
+  flex: 1;
+}
+
+/* 搜索表单 */
+.search-form {
+  background: white;
+  border-radius: 16rpx;
+  padding: 30rpx;
+  margin-bottom: 30rpx;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.05);
+}
+
+.search-field {
+  position: relative;
+  margin-bottom: 20rpx;
+}
+
+.search-input {
+  background: #f3f4f6;
+  border-radius: 8rpx;
+  padding: 20rpx;
+  padding-right: 70rpx;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.clear-btn {
+  position: absolute;
+  right: 20rpx;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 36rpx;
+  color: #9ca3af;
+  width: 50rpx;
+  height: 50rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 25rpx;
+}
+
+.clear-btn:active {
+  background: #e5e7eb;
+}
+
+.filter-section {
+  margin-bottom: 30rpx;
+}
+
+.filter-picker {
+  display: flex;
+  align-items: center;
+  background: #f3f4f6;
+  border-radius: 8rpx;
+  padding: 16rpx 20rpx;
+}
+
+.filter-label {
+  font-size: 28rpx;
+  color: #6b7280;
+  margin-right: 10rpx;
+}
+
+.filter-value {
+  font-size: 28rpx;
+  font-weight: 500;
+  flex: 1;
+}
+
+.filter-arrow {
+  font-size: 20rpx;
+  color: #6b7280;
+}
+
+.search-btn {
+  background: #3b82f6;
+  color: white;
+  border-radius: 8rpx;
+  width: 100%;
+  margin-top: 20rpx;
+}
+
+/* 结果列表 */
+.results-section {
+  margin-top: 20rpx;
+}
+
+.results-header {
+  margin-bottom: 20rpx;
+}
+
+.results-count {
+  font-size: 28rpx;
+  color: #6b7280;
+}
+
+.loading {
+  text-align: center;
+  padding: 40rpx;
+  color: #6b7280;
+}
+
+.empty-state {
+  background-color: #f9fafb;
+  border-radius: 16rpx;
+  padding: 80rpx;
+  text-align: center;
+  color: #6b7280;
+}
+
+.empty-icon {
+  font-size: 80rpx;
+  margin-bottom: 20rpx;
+}
+
+.empty-text {
+  font-size: 32rpx;
+  font-weight: 500;
+  margin-bottom: 10rpx;
+}
+
+.empty-subtext {
+  font-size: 28rpx;
+  color: #9ca3af;
+}
+
+/* 搜索提示 */
+.search-tips {
+  background: #f9fafb;
+  border-radius: 16rpx;
+  padding: 30rpx;
+  margin-top: 40rpx;
+}
+
+.tip-header {
+  font-size: 30rpx;
+  font-weight: 500;
+  margin-bottom: 20rpx;
+  text-align: center;
+  color: #4b5563;
+}
+
+.tip-item {
+  display: flex;
+  margin-bottom: 20rpx;
+  align-items: center;
+}
+
+.tip-icon {
+  margin-right: 16rpx;
+  font-size: 32rpx;
+}
+
+.tip-text {
+  font-size: 28rpx;
+  color: #4b5563;
+} 

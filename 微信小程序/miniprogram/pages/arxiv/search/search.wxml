@@ -1,0 +1,79 @@
+<view class="container">
+  <view class="page-header">
+    <view class="back-btn" bindtap="navigateBack">返回</view>
+    <view class="page-title">搜索arXiv论文</view>
+  </view>
+
+  <!-- 搜索表单 -->
+  <view class="search-form">
+    <view class="search-field">
+      <input 
+        class="search-input" 
+        placeholder="输入标题、作者或关键词" 
+        value="{{searchTerm}}"
+        bindinput="onSearchInput"
+        bindconfirm="handleSearch"
+        confirm-type="search"
+        focus="{{true}}"
+      />
+      <view class="clear-btn" wx:if="{{searchTerm}}" bindtap="clearSearch">×</view>
+    </view>
+    
+    <view class="filter-section">
+      <picker 
+        bindchange="onSubjectChange"
+        value="{{subjects.indexOf(subject)}}"
+        range="{{subjects}}"
+      >
+        <view class="filter-picker">
+          <view class="filter-label">主题:</view>
+          <view class="filter-value">{{subject}}</view>
+          <view class="filter-arrow">▼</view>
+        </view>
+      </picker>
+    </view>
+    
+    <button class="search-btn" bindtap="handleSearch" loading="{{loading}}">
+      搜索论文
+    </button>
+  </view>
+
+  <!-- 结果列表 -->
+  <view class="results-section">
+    <block wx:if="{{loading}}">
+      <view class="loading">正在搜索...</view>
+    </block>
+    <block wx:elif="{{hasSearched && papers.length === 0}}">
+      <view class="empty-state">
+        <view class="empty-icon">🔍</view>
+        <view class="empty-text">未找到匹配的论文</view>
+        <view class="empty-subtext">尝试不同的关键词或筛选条件</view>
+      </view>
+    </block>
+    <block wx:elif="{{papers.length > 0}}">
+      <view class="results-header">
+        <text class="results-count">找到 {{papers.length}} 篇论文</text>
+      </view>
+      <view class="papers-list">
+        <paper-card wx:for="{{papers}}" wx:key="arxiv_id" paper="{{item}}"></paper-card>
+      </view>
+    </block>
+    <block wx:elif="{{!hasSearched}}">
+      <view class="search-tips">
+        <view class="tip-header">搜索提示</view>
+        <view class="tip-item">
+          <view class="tip-icon">💡</view>
+          <view class="tip-text">使用关键词搜索标题和摘要</view>
+        </view>
+        <view class="tip-item">
+          <view class="tip-icon">💡</view>
+          <view class="tip-text">可以输入作者名称查找特定作者的论文</view>
+        </view>
+        <view class="tip-item">
+          <view class="tip-icon">💡</view>
+          <view class="tip-text">使用主题筛选器缩小搜索范围</view>
+        </view>
+      </view>
+    </block>
+  </view>
+</view> 

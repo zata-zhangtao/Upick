@@ -1,0 +1,7 @@
+{
+  "usingComponents": {
+    "paper-card": "../../../components/paper-card/paper-card"
+  },
+  "enablePullDownRefresh": true,
+  "navigationBarTitleText": "arXiv论文浏览器"
+}

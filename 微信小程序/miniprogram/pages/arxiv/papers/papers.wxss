@@ -1,0 +1,129 @@
+.container {
+  padding: 30rpx;
+  padding-bottom: 40rpx;
+}
+
+.page-header {
+  display: flex;
+  align-items: center;
+  padding: 20rpx 0 40rpx;
+}
+
+.back-btn {
+  font-size: 28rpx;
+  color: #3b82f6;
+  margin-right: 20rpx;
+}
+
+.page-title {
+  font-size: 36rpx;
+  font-weight: bold;
+  color: #333;
+  flex: 1;
+}
+
+/* 搜索栏 */
+.search-bar {
+  margin-bottom: 30rpx;
+  background: white;
+  border-radius: 16rpx;
+  padding: 20rpx;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.05);
+}
+
+.search-input-container {
+  display: flex;
+  margin-bottom: 20rpx;
+}
+
+.search-input {
+  flex: 1;
+  background: #f3f4f6;
+  border-radius: 8rpx;
+  padding: 16rpx;
+  margin-right: 20rpx;
+}
+
+.search-btn {
+  background: #3b82f6;
+  color: white;
+  border-radius: 8rpx;
+  padding: 16rpx 30rpx;
+  font-size: 28rpx;
+}
+
+.filter-section {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.filter-picker {
+  display: flex;
+  align-items: center;
+  background: #f3f4f6;
+  border-radius: 8rpx;
+  padding: 12rpx 20rpx;
+  margin-right: 20rpx;
+  margin-bottom: 10rpx;
+}
+
+.filter-label {
+  font-size: 26rpx;
+  color: #6b7280;
+  margin-right: 10rpx;
+}
+
+.filter-value {
+  font-size: 26rpx;
+  font-weight: 500;
+  margin-right: 10rpx;
+}
+
+.filter-arrow {
+  font-size: 20rpx;
+  color: #6b7280;
+}
+
+/* 论文列表 */
+.papers-list {
+  margin-top: 20rpx;
+}
+
+.loading, .loading-more, .no-more {
+  text-align: center;
+  padding: 40rpx;
+  color: #6b7280;
+}
+
+.loading-more {
+  font-size: 28rpx;
+}
+
+.no-more {
+  font-size: 28rpx;
+  color: #9ca3af;
+}
+
+.empty-state {
+  background-color: #f9fafb;
+  border-radius: 16rpx;
+  padding: 80rpx;
+  text-align: center;
+  color: #6b7280;
+}
+
+.empty-icon {
+  font-size: 80rpx;
+  margin-bottom: 20rpx;
+}
+
+.empty-text {
+  font-size: 32rpx;
+  font-weight: 500;
+  margin-bottom: 10rpx;
+}
+
+.empty-subtext {
+  font-size: 28rpx;
+  color: #9ca3af;
+} 

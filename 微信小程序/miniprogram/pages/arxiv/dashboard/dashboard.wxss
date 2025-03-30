@@ -1,0 +1,166 @@
+.container {
+  padding: 30rpx;
+  padding-bottom: 150rpx;
+}
+
+.page-header {
+  padding: 20rpx 0 40rpx;
+}
+
+.page-title {
+  font-size: 36rpx;
+  font-weight: bold;
+  color: #333;
+}
+
+/* 统计卡片 */
+.stats-container {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 40rpx;
+}
+
+.stat-card {
+  background: white;
+  border-radius: 16rpx;
+  box-shadow: 0 8rpx 24rpx rgba(0, 0, 0, 0.05);
+  padding: 30rpx;
+  text-align: center;
+  flex: 1;
+  margin: 0 10rpx;
+  border: 1px solid #e5e7eb;
+}
+
+.stat-value {
+  font-size: 40rpx;
+  font-weight: 600;
+  color: #3b82f6;
+  margin-bottom: 16rpx;
+}
+
+.stat-label {
+  color: #6b7280;
+  font-size: 24rpx;
+}
+
+/* 章节 */
+.section {
+  margin-bottom: 40rpx;
+  background: white;
+  border-radius: 16rpx;
+  padding: 30rpx;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.05);
+}
+
+.section-title {
+  font-size: 32rpx;
+  font-weight: bold;
+  margin-bottom: 20rpx;
+  color: #1f2937;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20rpx;
+}
+
+.section-more {
+  color: #3b82f6;
+  font-size: 28rpx;
+}
+
+/* 快速操作按钮 */
+.quick-actions {
+  display: flex;
+  flex-wrap: wrap;
+  margin: 0 -10rpx;
+}
+
+.action-btn {
+  margin: 10rpx;
+  background: #f3f4f6;
+  border-radius: 12rpx;
+  padding: 20rpx 30rpx;
+  flex-basis: calc(50% - 20rpx);
+  text-align: center;
+  transition: all 0.2s;
+}
+
+.action-btn:active {
+  background: #e5e7eb;
+}
+
+.btn-text {
+  font-size: 28rpx;
+  font-weight: 500;
+}
+
+/* 论文列表 */
+.papers-list {
+  margin-top: 20rpx;
+}
+
+.loading {
+  text-align: center;
+  padding: 40rpx;
+  color: #6b7280;
+}
+
+.empty-state {
+  background-color: #f9fafb;
+  border-radius: 16rpx;
+  padding: 80rpx;
+  text-align: center;
+  color: #6b7280;
+}
+
+.empty-icon {
+  font-size: 80rpx;
+  margin-bottom: 20rpx;
+}
+
+.empty-text {
+  font-size: 32rpx;
+  font-weight: 500;
+  margin-bottom: 10rpx;
+}
+
+.empty-subtext {
+  font-size: 28rpx;
+  color: #9ca3af;
+}
+
+/* 底部导航 */
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: white;
+  display: flex;
+  justify-content: space-around;
+  padding: 20rpx 0;
+  box-shadow: 0 -2rpx 10rpx rgba(0, 0, 0, 0.05);
+  border-top: 1rpx solid #e5e7eb;
+}
+
+.nav-item {
+  text-align: center;
+}
+
+.nav-icon {
+  font-size: 44rpx;
+  margin-bottom: 8rpx;
+}
+
+.nav-text {
+  font-size: 24rpx;
+  color: #6b7280;
+}
+
+.nav-item.active .nav-text {
+  color: #3b82f6;
+  font-weight: 500;
+} 

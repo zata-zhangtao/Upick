@@ -10,7 +10,9 @@ from src.db.config import SUBSCRIPTIONS_DB_PATH
 logger = get_logger("pages.arxiv_papers_page")
 
 def create_ui():
-    """Create Gradio interface for arXiv paper browsing"""
+    """Create Gradio interface for arXiv paper browsing
+    创建arXiv论文浏览的Gradio界面
+    """
     with gr.Blocks(css="""
         .paper-container {
             display: grid;
@@ -176,26 +178,28 @@ def create_ui():
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
         }
     """) as app:
-        gr.Markdown("# arXiv Papers Explorer")
+        gr.Markdown("# arXiv Papers Explorer") # title 标题
         
         # Create paper stats state
-        paper_count_state = gr.State(0)
-        category_count_state = gr.State(0)
+        paper_count_state = gr.State(0) # 论文数量状态
+        category_count_state = gr.State(0) # 类别数量状态
         
-        # Function to get database stats
+        # Function to get database stats  获取数据库统计信息
         def get_stats():
-            conn = sqlite3.connect(SUBSCRIPTIONS_DB_PATH)
+            conn = sqlite3.connect(SUBSCRIPTIONS_DB_PATH) # connect to database  连接数据库
             c = conn.cursor()
             
-            # Get paper count
+            # Get paper count  获取论文数量
             c.execute("SELECT COUNT(*) FROM arxiv_papers")
             paper_count = c.fetchone()[0]
+
+            print(f"paper_count: {paper_count}")
             
-            # Get category count
+            # Get category count  获取类别数量
             c.execute("SELECT COUNT(*) FROM arxiv_categories")
             category_count = c.fetchone()[0]
             
-            # Get latest paper date
+            # Get latest paper date  获取最新论文日期
             c.execute("SELECT MAX(fetched_at) FROM arxiv_papers")
             latest_date = c.fetchone()[0] or "No papers"
             
@@ -204,12 +208,12 @@ def create_ui():
             return paper_count, category_count, latest_date
         
         with gr.Tabs() as tabs:
-            # Create tabs
-            dashboard_tab = gr.Tab("Dashboard")
-            fetch_tab = gr.Tab("Fetch Papers")
-            browse_tab = gr.Tab("Browse Papers")
-            popular_tab = gr.Tab("Popular Categories")
-            manage_tab = gr.Tab("Data Management")
+            # Create tabs  创建标签页
+            dashboard_tab = gr.Tab("Dashboard") # 仪表盘标签页
+            fetch_tab = gr.Tab("Fetch Papers") # 抓取论文标签页
+            browse_tab = gr.Tab("Browse Papers") # 浏览论文标签页
+            popular_tab = gr.Tab("Popular Categories") # 热门类别标签页
+            manage_tab = gr.Tab("Data Management") # 数据管理标签页
             
             with dashboard_tab:
                 # Stats cards
@@ -235,6 +239,11 @@ def create_ui():
                             fetch_ai_btn = gr.Button("Fetch AI Papers", variant="primary")
                             fetch_ml_btn = gr.Button("Fetch ML Papers", variant="primary")
                             fetch_cv_btn = gr.Button("Fetch CV Papers", variant="primary")
+                            refresh_btn = gr.Button("Refresh Stats")
+                            refresh_btn.click(
+                                fn=lambda: get_stats(),
+                                outputs=[paper_count, category_count, latest_update]
+                                )
                 
                 # Recent papers preview
                 with gr.Row():

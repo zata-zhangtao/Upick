@@ -1,0 +1,30 @@
+<view class="paper-card">
+  <view class="paper-header">
+    <view class="paper-title">{{paper.title}}</view>
+    <view class="paper-id">arXiv: {{paper.arxiv_id}} | {{paper.fetched_at}}</view>
+  </view>
+  <view class="paper-body">
+    <view class="paper-abstract {{showFullAbstract ? 'full' : ''}}">
+      {{paper.abstract}}
+    </view>
+    <view class="toggle-abstract" bindtap="toggleAbstract">
+      {{showFullAbstract ? '收起' : '展开全文'}}
+    </view>
+    <view class="paper-meta">
+      <view class="paper-authors">
+        <text class="label">作者:</text> {{formatAuthors(paper.authors)}}
+      </view>
+      <view class="paper-subjects">
+        <text class="label">分类:</text> {{paper.subjects}}
+      </view>
+      <block wx:if="{{paper.comments}}">
+        <view class="paper-comments">
+          <text class="label">评论:</text> {{paper.comments}}
+        </view>
+      </block>
+    </view>
+    <view class="paper-link">
+      <button bindtap="openPaperLink" type="primary" size="mini">复制arXiv链接</button>
+    </view>
+  </view>
+</view> 

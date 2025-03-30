@@ -1,0 +1,84 @@
+<view class="container">
+  <view class="page-header">
+    <view class="page-title">arXiv论文浏览器</view>
+  </view>
+
+  <!-- 统计卡片 -->
+  <view class="stats-container">
+    <view class="stat-card">
+      <view class="stat-value">{{stats.paperCount}}</view>
+      <view class="stat-label">数据库中的论文</view>
+    </view>
+    <view class="stat-card">
+      <view class="stat-value">{{stats.categoryCount}}</view>
+      <view class="stat-label">arXiv分类</view>
+    </view>
+    <view class="stat-card">
+      <view class="stat-value">{{stats.latestUpdate}}</view>
+      <view class="stat-label">最近更新</view>
+    </view>
+  </view>
+
+  <!-- 快速操作 -->
+  <view class="section">
+    <view class="section-title">快速操作</view>
+    <view class="quick-actions">
+      <view class="action-btn" bindtap="fetchCategoryPapers" data-category="cs.AI">
+        <view class="btn-text">AI论文</view>
+      </view>
+      <view class="action-btn" bindtap="fetchCategoryPapers" data-category="cs.LG">
+        <view class="btn-text">ML论文</view>
+      </view>
+      <view class="action-btn" bindtap="fetchCategoryPapers" data-category="cs.CV">
+        <view class="btn-text">CV论文</view>
+      </view>
+      <view class="action-btn" bindtap="navigateTo" data-page="categories">
+        <view class="btn-text">全部分类</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 论文浏览入口 -->
+  <view class="section">
+    <view class="section-header">
+      <view class="section-title">最新论文</view>
+      <view class="section-more" bindtap="navigateTo" data-page="papers">查看更多</view>
+    </view>
+
+    <view class="papers-list">
+      <block wx:if="{{loading}}">
+        <view class="loading">加载中...</view>
+      </block>
+      <block wx:elif="{{papers.length > 0}}">
+        <paper-card wx:for="{{papers}}" wx:key="arxiv_id" paper="{{item}}"></paper-card>
+      </block>
+      <block wx:else>
+        <view class="empty-state">
+          <view class="empty-icon">📄</view>
+          <view class="empty-text">没有找到论文</view>
+          <view class="empty-subtext">尝试获取新的论文或者修改搜索条件</view>
+        </view>
+      </block>
+    </view>
+  </view>
+
+  <!-- 底部导航 -->
+  <view class="bottom-nav">
+    <view class="nav-item active">
+      <view class="nav-icon">📊</view>
+      <view class="nav-text">主页</view>
+    </view>
+    <view class="nav-item" bindtap="navigateTo" data-page="papers">
+      <view class="nav-icon">📄</view>
+      <view class="nav-text">论文</view>
+    </view>
+    <view class="nav-item" bindtap="navigateTo" data-page="categories">
+      <view class="nav-icon">📁</view>
+      <view class="nav-text">分类</view>
+    </view>
+    <view class="nav-item" bindtap="navigateTo" data-page="search">
+      <view class="nav-icon">🔍</view>
+      <view class="nav-text">搜索</view>
+    </view>
+  </view>
+</view> 

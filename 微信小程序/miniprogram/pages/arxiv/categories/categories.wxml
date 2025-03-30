@@ -1,0 +1,58 @@
+<wxs module="filter">
+  function getFilteredCategories(categories, searchTerm) {
+    if (!searchTerm) {
+      return categories;
+    }
+    
+    return categories.filter(function(category) {
+      return category.code.toLowerCase().indexOf(searchTerm.toLowerCase()) !== -1 || 
+             category.name.toLowerCase().indexOf(searchTerm.toLowerCase()) !== -1;
+    });
+  }
+  
+  module.exports = {
+    getFilteredCategories: getFilteredCategories
+  };
+</wxs>
+
+<view class="container">
+  <view class="page-header">
+    <view class="back-btn" bindtap="navigateBack">返回</view>
+    <view class="page-title">热门arXiv分类</view>
+  </view>
+
+  <!-- 搜索栏 -->
+  <view class="search-bar">
+    <input 
+      class="search-input" 
+      placeholder="搜索分类名称或代码" 
+      value="{{searchTerm}}"
+      bindinput="onSearchInput"
+    />
+  </view>
+
+  <!-- 分类列表 -->
+  <view class="categories-list">
+    <block wx:if="{{filter.getFilteredCategories(categories, searchTerm).length > 0}}">
+      <view 
+        wx:for="{{filter.getFilteredCategories(categories, searchTerm)}}" 
+        wx:key="code"
+        class="category-card"
+        bindtap="navigateToPapers"
+        data-category="{{item.code}}"
+      >
+        <view class="category-info">
+          <view class="category-name">{{item.name}}</view>
+          <view class="category-code">{{item.code}}</view>
+        </view>
+        <view class="category-arrow">→</view>
+      </view>
+    </block>
+    <block wx:else>
+      <view class="empty-state">
+        <view class="empty-icon">📁</view>
+        <view class="empty-text">没有找到匹配的分类</view>
+      </view>
+    </block>
+  </view>
+</view> 

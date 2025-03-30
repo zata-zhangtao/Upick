@@ -1,0 +1,8 @@
+{
+  "usingComponents": {
+    "paper-card": "../../../components/paper-card/paper-card"
+  },
+  "enablePullDownRefresh": true,
+  "onReachBottomDistance": 300,
+  "navigationBarTitleText": "arXiv论文"
+} 

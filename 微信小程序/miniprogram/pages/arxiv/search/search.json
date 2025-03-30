@@ -1,0 +1,6 @@
+{
+  "usingComponents": {
+    "paper-card": "../../../components/paper-card/paper-card"
+  },
+  "navigationBarTitleText": "搜索arXiv论文"
+} 
