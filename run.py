@@ -1,6 +1,7 @@
 from src.services import add_refresh_job, shutdown_scheduler, start_scheduler
 from src.pages.gradio_page import app as subscription_app
-from src.pages.arxiv_papers_page import app as arxiv_app
+# from src.pages.arxiv_papers_page import app as arxiv_app
+from src.pages.Upick_for_arxiv import app as arxiv_app
 import gradio as gr
 
 def create_combined_ui():
@@ -36,10 +37,15 @@ if __name__ == "__main__":
         )
         
         # Launch arXiv app on a different port
+        # arxiv_app.queue().launch(
+        #     server_name="0.0.0.0", 
+        #     server_port=7861,
+        #     share=False
+        # )
         arxiv_app.queue().launch(
             server_name="0.0.0.0", 
             server_port=7861,
-            share=False
+            share=False,
         )
     finally:
         # 应用关闭时优雅地关闭调度器
