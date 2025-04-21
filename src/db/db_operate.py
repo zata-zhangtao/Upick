@@ -54,6 +54,12 @@ def add_subscription(url:str, check_interval:int)->str:
         c.execute("UPDATE subscriptions SET last_updated_at = ? WHERE id = ?",
                   (current_time, subscription_id))
 
+
+        summary = SubscriptionAgent().generate_summary(content)
+        c.execute("INSERT INTO summaries (content_update_id, summary) VALUES (?, ?)",
+                  (subscription_id, json.dumps(summary.model_dump(), ensure_ascii=False)))
+
+
         conn.commit()
         conn.close()
         return f"Successfully added subscription and fetched initial content: {url}"
