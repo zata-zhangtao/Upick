@@ -4,12 +4,13 @@ General web crawler implementation for extracting clean text content from websit
 
 import requests
 from bs4 import BeautifulSoup
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, List
 from .base import BaseCrawler
 from . import utils
+from .registry import registry
 
 
-class WebCrawler:
+class WebCrawler(BaseCrawler):
     """
     General-purpose web crawler for fetching and cleaning content from any website.
     Specialized in extracting readable text content from HTML pages.
@@ -133,4 +134,44 @@ class WebCrawler:
             "url": url,
             "content": content,
             "timestamp": utils.get_current_timestamp()
-        } 
+        }
+    
+    def crawl(self, url: str) -> List[Dict[str, Any]]:
+        """
+        Crawl the specified URL and extract data.
+        
+        This method first checks if there's a specialized crawler for the URL.
+        If not, it falls back to the general web crawler.
+        
+        Args:
+            url: URL to crawl
+            
+        Returns:
+            List of dictionaries containing the extracted data
+        """
+        # Check if there's a specialized crawler for this URL
+        specialized_crawler_class = registry.get_crawler(url)
+        
+        if specialized_crawler_class:
+            # Use the specialized crawler
+            crawler = specialized_crawler_class()
+            return crawler.crawl(url)
+        
+        # Fall back to general web crawler
+        result = self.fetch_structured_content(url)
+        return [result] 
+    
+
+if __name__ == "__main__":
+    crawler = WebCrawler()
+
+    result = crawler.crawl("https://arxiv.org/list/cs.AI/new")
+    # print(crawler.crawl("https://arxiv.org/list/cs.AI/new"))
+    # print(len(result))
+    # print(result[0])
+    print(type(result[0]))
+    import numpy as np
+    # print(np.array(result).shape)
+
+
+

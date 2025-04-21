@@ -43,8 +43,11 @@ def add_subscription(url:str, check_interval:int)->str:
 
         # Fetch initial content
         crawler = WebCrawler()
-        content = crawler.fetch_and_clean_content(url)
-
+        # content = crawler.fetch_and_clean_content(url)
+        content = crawler.crawl(url)  # this is a list of dicts
+        content = json.dumps(content, ensure_ascii=False)
+        if content.startswith("Failed to retrieve content "):
+            return f"Failed to retrieve content: {url}"
         # Store content
         c.execute("INSERT INTO contents (subscription_id, content) VALUES (?, ?)",
                   (subscription_id, content))
@@ -105,7 +108,8 @@ def refresh_content(similarity_threshold:float=0.95)->str:
             old_content = old_content_row[1] # 获取内容  Get content
             
             # 获取新内容  Fetch new content
-            new_content = crawler.fetch_and_clean_content(url)
+            new_content = crawler.crawl(url)
+            new_content = json.dumps(new_content, ensure_ascii=False)
             
             # 存储新内容  Store new content
             c.execute("""

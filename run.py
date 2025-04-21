@@ -29,12 +29,12 @@ if __name__ == "__main__":
     
     try:
         # Launch apps on different ports
-        subscription_thread = subscription_app.queue().launch(
-            server_name="0.0.0.0", 
-            server_port=7860,
-            share=False,
-            prevent_thread_lock=True
-        )
+        # subscription_thread = subscription_app.queue().launch(
+        #     server_name="0.0.0.0", 
+        #     server_port=7860,
+        #     share=False,
+        #     prevent_thread_lock=True
+        # )
         
         # Launch arXiv app on a different port
         # arxiv_app.queue().launch(
