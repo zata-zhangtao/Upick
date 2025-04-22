@@ -37,6 +37,7 @@ class ArxivCrawler(BaseCrawler):
         Returns:
             List of dictionaries containing paper information 包含论文信息的字典列表
         """
+        logger.info(f"Starting crawl from: {self.default_url}")
         target_url = url or self.default_url
         print(f"Starting crawl from: {target_url}")
         

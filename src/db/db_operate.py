@@ -43,16 +43,35 @@ def add_subscription(url:str, check_interval:int)->str:
 
         # Fetch initial content
         crawler = WebCrawler()
-        content = crawler.fetch_and_clean_content(url)
-
+        # content = crawler.fetch_and_clean_content(url)
+        content = crawler.crawl(url)  # this is a list of dicts
+        content = json.dumps(content, ensure_ascii=False)
+        if content.startswith("Failed to retrieve content "):
+            return f"Failed to retrieve content: {url}"
         # Store content
         c.execute("INSERT INTO contents (subscription_id, content) VALUES (?, ?)",
                   (subscription_id, content))
-
+        content_id = c.lastrowid
         # Update last_updated_at timestamp
         current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         c.execute("UPDATE subscriptions SET last_updated_at = ? WHERE id = ?",
                   (current_time, subscription_id))
+        
+
+        # insert into content_updates
+        c.execute("""
+                    INSERT INTO content_updates 
+                    (subscription_id, old_content_id, new_content_id, similarity_ratio, diff_details)
+                    VALUES (?, ?, ?, ?, ?)
+                """, (subscription_id, "None", content_id, 0, content))
+        
+        content_update_id = c.lastrowid
+
+        # summary ，第一次添加订阅时，生成摘要
+        summary = SubscriptionAgent().generate_summary(content)
+        logger.info(f"生成摘要并插入数据库... {url} --- {summary}")
+        c.execute("INSERT INTO summaries (content_update_id, summary) VALUES (?, ?)",
+                  (content_update_id, json.dumps(summary.model_dump(), ensure_ascii=False)))
 
 
         summary = SubscriptionAgent().generate_summary(content)
@@ -62,6 +81,7 @@ def add_subscription(url:str, check_interval:int)->str:
 
         conn.commit()
         conn.close()
+        logger.info(f"成功添加订阅并获取初始内容: {url}")
         return f"Successfully added subscription and fetched initial content: {url}"
 
 def refresh_content(similarity_threshold:float=0.95)->str:
@@ -111,7 +131,8 @@ def refresh_content(similarity_threshold:float=0.95)->str:
             old_content = old_content_row[1] # 获取内容  Get content
             
             # 获取新内容  Fetch new content
-            new_content = crawler.fetch_and_clean_content(url)
+            new_content = crawler.crawl(url)
+            new_content = json.dumps(new_content, ensure_ascii=False)
             
             # 存储新内容  Store new content
             c.execute("""
