@@ -2,3 +2,4 @@
 *.env
 *.pyc
 logs/app.log
+resources/database/subscriptions.db

@@ -67,7 +67,7 @@ def add_subscription(url:str, check_interval:int)->str:
         
         content_update_id = c.lastrowid
 
-        # summary ，第一次添加订阅时，生成摘要
+        # summary when first adding a subscription, generate a summary  第一次添加订阅时，生成摘要
         summary = SubscriptionAgent().generate_summary(content)
         logger.info(f"生成摘要并插入数据库... {url} --- {summary}")
         c.execute("INSERT INTO summaries (content_update_id, summary) VALUES (?, ?)",
@@ -107,7 +107,7 @@ def refresh_content(similarity_threshold:float=0.95)->str:
         FROM subscriptions
     """)
     subscriptions = c.fetchall() # 获取所有订阅 主要是url  Get all subscriptions
-    
+
     current_time = datetime.now() # 当前时间  Current time
     crawler = WebCrawler() # 爬虫对象  WebCrawler object
     updated_count = 0 # 更新计数  Update count
@@ -175,7 +175,7 @@ def refresh_content(similarity_threshold:float=0.95)->str:
             
             updated_count += 1
 
-    conn.commit()
+            conn.commit()
     conn.close()
     logger.info(f"成功刷新内容... {updated_count} 个订阅")
 
