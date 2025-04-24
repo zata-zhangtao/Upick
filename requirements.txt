@@ -7,3 +7,5 @@ python-dotenv==1.0.1
 Requests==2.32.3
 APScheduler==3.11.0
 python-dateutil>=2.8.1 
+langchain-community>=0.3.22
+pyjwt==2.10.1

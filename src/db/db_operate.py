@@ -47,6 +47,8 @@ def add_subscription(url:str, check_interval:int)->str:
         content = crawler.crawl(url)  # this is a list of dicts
         content_json = json.dumps(content, ensure_ascii=False)
 
+        logger.info(f"爬取内容content_json前100字符: {content_json[:100]}")
+
         c.execute("INSERT INTO contents (subscription_id, content) VALUES (?, ?)",
                 (subscription_id, content_json))
         content_id = c.lastrowid
@@ -74,11 +76,14 @@ def add_subscription(url:str, check_interval:int)->str:
             content_update_id = c.lastrowid
 
             # summary when first adding a subscription, generate a summary  第一次添加订阅时，生成摘要
-            summary = SubscriptionAgent().generate_summary(content)
-            logger.info(f"生成摘要并插入数据库... {url} --- {summary}")
-            c.execute("INSERT INTO summaries (content_update_id, summary) VALUES (?, ?)",
-                    (content_update_id, json.dumps(summary.model_dump(), ensure_ascii=False)))
+            summary = SubscriptionAgent().generate_summary(content_json)
 
+            if summary.content is not None and len(summary.content) > 0:
+                logger.info(f"生成摘要并插入数据库... {url} --- {summary}")
+                c.execute("INSERT INTO summaries (content_update_id, summary) VALUES (?, ?)",
+                        (content_update_id, json.dumps(summary.model_dump(), ensure_ascii=False)))
+            else:
+                logger.info(f"没有生成摘要... {url}")
     
             logger.info(f"成功添加订阅并获取初始内容: {url}")
             conn.commit()
@@ -158,15 +163,18 @@ def refresh_content(similarity_threshold:float=0.95)->str:
                 
                 # Generate summary
                 summary = SubscriptionAgent().generate_summary(diffs)
-                logger.info(f"生成摘要并插入数据库... {url} --- {summary}")
+                if summary.content is not None and len(summary.content) > 0:
+                    logger.info(f"生成摘要并插入数据库... {url} --- {summary}")
+                    
+                    # Store summary in the summaries table
+                    c.execute("""
+                        INSERT INTO summaries 
+                        (content_update_id, summary)
+                        VALUES (?, ?)
+                    """, (content_update_id, json.dumps(summary.model_dump(), ensure_ascii=False)))
+                else:
+                    logger.info(f"没有生成摘要... {url}")
                 
-                # Store summary in the summaries table
-                c.execute("""
-                    INSERT INTO summaries 
-                    (content_update_id, summary)
-                    VALUES (?, ?)
-                """, (content_update_id, json.dumps(summary.model_dump(), ensure_ascii=False)))
-            
             # 更新最后检查时间,无论是否生成摘要  "Update last_updated_at timestamp, whether a summary is generated or not"
             c.execute("""
                 UPDATE subscriptions 

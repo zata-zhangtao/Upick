@@ -9,8 +9,16 @@ from typing import List, Optional
 from src.log import get_logger
 logger = get_logger("agent.summary")
 
-# 假设的 LLM 获取函数（需要根据你的实际环境调整）
-from src.agent.llm import get_ali_llm
+# 导入LLM获取函数
+from src.agent.llm import get_ali_llm, get_zhipu_llm
+import yaml
+import os
+
+# 加载配置文件
+ROOT_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+yaml_path = os.path.join(ROOT_DIR, "config.yaml")
+with open(yaml_path, "r", encoding="utf-8") as file:
+    config_data = yaml.safe_load(file)
 
 # 定义 Pydantic 模型用于输出解析
 class SummaryResponse(BaseModel):
@@ -30,8 +38,26 @@ class SubscriptionAgent:
             max_retries: 最大重试次数
             retry_delay: 重试间隔时间（秒）
         """
-        # 初始化 LLM，如果没有传入特定模型，使用默认配置
-        self.llm = llm_model if llm_model else get_ali_llm("qwq-32b")
+        # 根据配置文件选择模型
+        if llm_model:
+            self.llm = llm_model
+        else:
+            provider = config_data["app"]["provider"]
+            model_name = config_data["app"]["model"]
+            base_url = config_data["app"]["api_base"]
+            
+            if provider == "DASHSCOPE":
+                self.llm = get_ali_llm(model_name, base_url)
+                logger.info(f"使用阿里云模型: {model_name}")
+            elif provider == "ZHIPU":
+                self.llm = get_zhipu_llm(model_name, base_url)
+                logger.info(f"使用智谱模型: {model_name}")
+            else:
+                # logger.warning(f"未知的模型提供商: {provider}，默认使用阿里云模型")
+                # self.llm = get_ali_llm(model_name)
+                logger.warning(f"未知的模型提供商: {provider}，默认使用智谱模型")
+                self.llm = get_zhipu_llm(model_name)
+        
         self.max_retries = max_retries  # 最大重试次数
         self.retry_delay = retry_delay  # 重试间隔时间（秒）
         
@@ -78,7 +104,7 @@ class SubscriptionAgent:
         返回:
             SummaryResponse: 包含摘要内容的 Pydantic 模型
         """
-        logger.debug(f"正在生成摘要...")
+        logger.debug(f"开始生成摘要...")
         retries = 0
         last_exception = None
         raw_response = None
@@ -88,7 +114,9 @@ class SubscriptionAgent:
                 # 执行 LLM 调用获取原始响应
                 chain = self.prompt_template | self.llm
                 raw_response = chain.invoke({"contentdiff": contentdiff})
-                
+                logger.debug(f"llm——raw_response: {raw_response}")
+
+
                 # 检查并提取原始内容
                 raw_content = raw_response.content if hasattr(raw_response, 'content') else str(raw_response)
                 json_content = self.extract_json(raw_content)
@@ -135,7 +163,7 @@ class SubscriptionAgent:
 def main():
     # 创建示例 contentdiff，确保包含可提取的关键点
     sample_contentdiff = """
-"[""Changed: '1' -> '2  分钟前\n.\nAIbase\nFlower Labs 颠覆AI应用模式，2360万美元打造首个全开放混合计算平台\n人工智能正在以前所未有的速度融入我们的日常应用，而一家名为Flower Labs的初创公司正以革命性的方式改变AI模型的部署和运行方式。这家获得Y Combinator支持的新锐企业近日推出了Flower Intelligence，一个创新的分布式云平台，专为在移动设备、个人电脑和网络应用中提供AI模型服务而设计。Flower Intelligence的核心优势在于其独特的混合计算策略。该平台允许应用程序在本地设备上运行AI模型，既保证了速度，又增强了隐私保护。当需要更强大的计算能力时，系统会在获得用户同意的情况下，无\n7'"", ""Added: '美国埃隆大学的一项调查显示，5'"", ""Added: '%的美国成年人都曾使用过像ChatGPT、Gemini、Claude这样的AI大语言模型。这项由北卡罗来纳州埃隆大学“想象数字未来中心”在'"", ""Added: '月份开展的调查，选取了500名受访者。结果发现，在使用过AI的人群中，34%的人表示至少每天会使用一次大语言模型。其中，ChatGPT最受欢迎，72%的受访者都用过;谷歌的Gemini位居第二，使用率为50% 。图源备注：图片由AI生成，图片授权服务商Midjourney越来越多的人开始和AI聊天机器人建立起特殊的关系。调查显示，38%的用户认为大语言模\n27'"", ""Changed: '3' -> '9'"", ""Changed: '49' -> '55'"", ""Changed: '1' -> '2'"", ""Deleted: '\n2  小时前\n.\nAIbase\n叫板Sora？潞晨科技开源视频大模型Open-Sora 2.0，降本提速\n听说过壕无人性的 OpenAI Sora 吧?动辄几百万美元的训练成本，简直就是视频生成界的“劳斯莱斯”。现在，潞晨科技宣布开源视频生成模型 Open-Sora2.0!仅仅花费了区区20万美元（相当于224张 GPU 的投入），就成功训练出了一个拥有 110亿参数的商业级视频生成大模型。性能直追“OpenAI Sora ”别看 Open-Sora2.0成本不高，实力可一点都不含糊。它可是敢于叫板行业标杆 HunyuanVideo 和拥有300亿参数的 Step-Video 的狠角色。在权威评测 VBench 和用户偏好测试中，Open-Sora2.0的表现都令人刮目相看，多项关键指'""]"
+"[""Changed: '1' -> '2  分钟前\n.\nAIbase\nFlower Labs 颠覆AI应用模式，2360万美元打造首个全开放混合计算平台\n人工智能正在以前所未有的速度融入我们的日常应用，而一家名为Flower Labs的初创公司正以革命性的方式改变AI模型的部署和运行方式。这家获得Y Combinator支持的新锐企业近日推出了Flower Intelligence，一个创新的分布式云平台，专为在移动设备、个人电脑和网络应用中提供AI模型服务而设计。Flower Intelligence的核心优势在于其独特的混合计算策略。该平台允许应用程序在本地设备上运行AI模型，既保证了速度，又增强了隐私保护。当需要更强大的计算能力时，系统会在获得用户同意的情况下，无\n7'"", ""Added: '美国埃隆大学的一项调查显示，5'"", ""Added: '%的美国成年人都曾使用过像ChatGPT、Gemini、Claude这样的AI大语言模型。这项由北卡罗来纳州埃隆大学"想象数字未来中心"在'"", ""Added: '月份开展的调查，选取了500名受访者。结果发现，在使用过AI的人群中，34%的人表示至少每天会使用一次大语言模型。其中，ChatGPT最受欢迎，72%的受访者都用过;谷歌的Gemini位居第二，使用率为50% 。图源备注：图片由AI生成，图片授权服务商Midjourney越来越多的人开始和AI聊天机器人建立起特殊的关系。调查显示，38%的用户认为大语言模\n27'"", ""Changed: '3' -> '9'"", ""Changed: '49' -> '55'"", ""Changed: '1' -> '2'"", ""Deleted: '\n2  小时前\n.\nAIbase\n叫板Sora？潞晨科技开源视频大模型Open-Sora 2.0，降本提速\n听说过壕无人性的 OpenAI Sora 吧?动辄几百万美元的训练成本，简直就是视频生成界的"劳斯莱斯"。现在，潞晨科技宣布开源视频生成模型 Open-Sora2.0!仅仅花费了区区20万美元（相当于224张 GPU 的投入），就成功训练出了一个拥有 110亿参数的商业级视频生成大模型。性能直追"OpenAI Sora "别看 Open-Sora2.0成本不高，实力可一点都不含糊。它可是敢于叫板行业标杆 HunyuanVideo 和拥有300亿参数的 Step-Video 的狠角色。在权威评测 VBench 和用户偏好测试中，Open-Sora2.0的表现都令人刮目相看，多项关键指'""]"
 
     """
     
@@ -144,9 +172,6 @@ def main():
     summary_result = agent.generate_summary(sample_contentdiff)
     
     # 打印调试信息
-    # print("Raw response:", summary_result.raw_response)
-    # print("Error message:", summary_result.error_message)
-    # print("Summary result:")
     print(json.dumps(summary_result.model_dump(), indent=2, ensure_ascii=False))
 
 if __name__ == "__main__":

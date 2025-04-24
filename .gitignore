@@ -3,3 +3,4 @@
 *.pyc
 logs/app.log
 resources/database/subscriptions.db
+test.py
