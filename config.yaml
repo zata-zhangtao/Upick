@@ -1,17 +1,18 @@
 # 应用配置
-# app:
-#   log_level: debug   # 日志级别,大于此级别的会显示在终端
-#   provider: DASHSCOPE  # 接口厂商 可选值（全大写）: OPENAI, ANTHROPIC, GEMINI, OLLAMA, DASHSCOPE
-#   api_base: None  # API基础URL，可根据不同厂商调整，默认设置为空，会根据provider自动设置；不为空时，会根据api_base设置
-#   model: qwq-plus-2025-03-05 # 默认模型
-#   api_key: None  # API密钥，默认设置为空，会根据.env文件中的API_KEY设置, 建议不要在此处设置
 
-# 智谱配置
+# ali 配置
 app:
   log_level: debug   # 日志级别,大于此级别的会显示在终端
-  provider: ZHIPU  # 接口厂商 可选值（全大写）: OPENAI, ANTHROPIC, GEMINI, OLLAMA, DASHSCOPE
-  api_base: https://open.bigmodel.cn/api/paas/v4/chat/completions  # API基础URL，可根据不同厂商调整，默认设置为空，会根据provider自动设置；不为空时，会根据api_base设置
-  # model: GLM-4-Flash-250414 # 默认模型
-  model: GLM-Z1-Flash # 默认模型 # 默认模型
-  api_key: None  # API密钥，默认设置为空，会根据.env文件中的API_KEY设置, 建议不要在此处设置
+  provider: DASHSCOPE  # 接口厂商 可选值（全大写）: OPENAI, ANTHROPIC, GEMINI, OLLAMA, DASHSCOPE
+  api_base:   # API基础URL，可根据不同厂商调整，默认设置为空，会根据provider自动设置；不为空时，会根据api_base设置()
+  model: qwq-plus-2025-03-05 # 默认模型
+
+# # 智谱配置
+# app:
+#   log_level: debug   # 日志级别,大于此级别的会显示在终端
+#   provider: ZHIPU  # 接口厂商 可选值（全大写）: OPENAI, ANTHROPIC, GEMINI, OLLAMA, DASHSCOPE
+#   api_base:  # API基础URL，可根据不同厂商调整，默认设置为空，会根据provider自动设置；不为空时，会根据api_base设置
+#   # model: GLM-4-Flash-250414 # 默认模型
+#   model: GLM-Z1-Flash # 默认模型 # 默认模型
+
 

@@ -139,7 +139,7 @@ class SubscriptionAgent:
                 return response
 
             except Exception as e:
-                logger.error(f"摘要生成失败: {e}")
+                logger.error(f"摘要生成失败 at line {e.__traceback__.tb_lineno}: {e}")
                 last_exception = e
                 retries += 1
                 if retries < self.max_retries:
