@@ -4,6 +4,9 @@ from src.pages.gradio_page import app as subscription_app
 from src.pages.Upick_for_arxiv import app as arxiv_app
 from src.pages.delete_page import app as delete_record_app
 import gradio as gr
+import apscheduler
+
+
 
 def create_combined_ui():
     """Create a combined UI with tabs for different apps"""
@@ -20,9 +23,10 @@ def create_combined_ui():
     # In older Gradio, we have to choose one app to return
     return subscription_interface
 
-if __name__ == "__main__":
-    
-    # 添加默认的刷新任务（每小时刷新一次）
+
+
+def main():
+        # 添加默认的刷新任务（每小时刷新一次）
     add_refresh_job(hours=0, minutes=30)
     
     # 启动调度器
@@ -54,3 +58,39 @@ if __name__ == "__main__":
     finally:
         # 应用关闭时优雅地关闭调度器
         shutdown_scheduler()
+
+if __name__ == "__main__":
+    main()
+    
+    # # 添加默认的刷新任务（每小时刷新一次）
+    # add_refresh_job(hours=0, minutes=30)
+    
+    # # 启动调度器
+    # start_scheduler()
+    
+    # try:
+    #     delete_record_app.queue().launch(
+    #         server_name="127.0.0.1", 
+    #         server_port=7862,
+    #         prevent_thread_lock=True,
+    #         share=False,
+    #     )
+
+
+    #     # Launch apps on different ports
+    #     # subscription_thread = subscription_app.queue().launch(
+    #     #     server_name="0.0.0.0", 
+    #     #     server_port=7860,
+    #     #     share=False,
+    #     #     prevent_thread_lock=True
+    #     # )
+        
+    #     # Launch arXiv app on a different port
+    #     arxiv_app.queue().launch(
+    #         server_name="127.0.0.1", 
+    #         server_port=7861,
+    #         share=False
+    #     )
+    # finally:
+    #     # 应用关闭时优雅地关闭调度器
+    #     shutdown_scheduler()

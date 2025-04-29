@@ -4,7 +4,6 @@
 from langchain_openai import ChatOpenAI
 from langchain.prompts import PromptTemplate
 from langchain.chains import LLMChain
-# from langchain_openai import ChatOpenAI
 from langchain_community.chat_models import ChatZhipuAI
 import os
 import os
@@ -44,13 +43,6 @@ def get_ali_llm(model, base_url=None):
         # other params...
     )
 
-# try:
-#     ali_llm = get_ali_llm(model=config_data["app"]["model"])
-#     logger.info(f"阿里云模型连接成功: {config_data['app']['model']}")
-# except Exception as e:
-#     logger.error(f"阿里云模型连接失败: {e}")
-#     assert False, "阿里云模型连接失败"
-
 
 
 
@@ -72,6 +64,4 @@ def get_zhipu_llm(model, base_url=None):
         model=model,
         streaming=True,
     )
-
-
 
