@@ -18,10 +18,6 @@ load_dotenv()
 
 ROOT_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-yaml_path = os.path.join(ROOT_DIR, "config.yaml")
-
-with open(yaml_path, "r", encoding="utf-8") as file:
-    config_data = yaml.safe_load(file)
 
 def get_ali_llm(model, base_url=None):
     """

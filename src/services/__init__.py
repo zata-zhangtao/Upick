@@ -1,8 +1,10 @@
 from .scheduler import add_refresh_job, add_daily_refresh_job, initialize_scheduler, start_scheduler, scheduler,shutdown_scheduler
+from .configmanager import ConfigManager
 __all__ = [
             "add_refresh_job", 
             "add_daily_refresh_job", 
-            "initialize_scheduler"
+            "initialize_scheduler",
+            "ConfigManager"
             ]
 
 

@@ -6,3 +6,4 @@ resources/database/subscriptions.db
 test.py
 releases/Upick/site-packages
 releases/Upick/script
+test*

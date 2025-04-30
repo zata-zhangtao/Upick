@@ -4,6 +4,12 @@
 
 ## 待完成
 
+- [ ] 一般的页面爬虫的时候同时爬取url内容
+
+- [ ] Add a page that allows users to modify the apikey and model
+
+
+
 - [ ] 完善 arXiv 爬虫功能
   - [ ] 支持更多分类
   - [ ] 添加定时抓取功能

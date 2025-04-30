@@ -1,5 +1,7 @@
 from datetime import datetime
 import time
+import yaml
+import os
 from langchain_core.prompts import PromptTemplate
 from langchain_core.output_parsers import PydanticOutputParser
 import json
@@ -7,18 +9,11 @@ import re
 from pydantic import BaseModel, Field
 from typing import List, Optional
 from src.log import get_logger
+from src.agent.llm import get_ali_llm, get_zhipu_llm
 logger = get_logger("agent.summary")
 
-# 导入LLM获取函数
-from src.agent.llm import get_ali_llm, get_zhipu_llm
-import yaml
-import os
 
-# 加载配置文件
-ROOT_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-yaml_path = os.path.join(ROOT_DIR, "config.yaml")
-with open(yaml_path, "r", encoding="utf-8") as file:
-    config_data = yaml.safe_load(file)
+
 
 # 定义 Pydantic 模型用于输出解析
 class SummaryResponse(BaseModel):
@@ -42,9 +37,11 @@ class SubscriptionAgent:
         if llm_model:
             self.llm = llm_model
         else:
-            provider = config_data["app"]["provider"]
-            model_name = config_data["app"]["model"]
-            base_url = config_data["app"]["api_base"]
+            from src.services import ConfigManager
+            config = ConfigManager().get_config()
+            provider = config["app"]["provider"]
+            model_name = config["app"]["model"]
+            base_url = config["app"]["api_base"]
             
             if provider == "DASHSCOPE":
                 self.llm = get_ali_llm(model_name, base_url)
