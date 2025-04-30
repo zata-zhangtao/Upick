@@ -41,13 +41,14 @@ class SubscriptionAgent:
             config = ConfigManager().get_config()
             provider = config["app"]["provider"]
             model_name = config["app"]["model"]
-            base_url = config["app"]["api_base"]
+            base_url = config["app"]["base_url"]
+            api_key = config["app"]["api_key"]
             
             if provider == "DASHSCOPE":
-                self.llm = get_ali_llm(model_name, base_url)
+                self.llm = get_ali_llm(model_name, base_url,api_key)
                 logger.info(f"使用阿里云模型: {model_name}")
             elif provider == "ZHIPU":
-                self.llm = get_zhipu_llm(model_name, base_url)
+                self.llm = get_zhipu_llm(model_name, base_url,api_key)
                 logger.info(f"使用智谱模型: {model_name}")
             else:
                 # logger.warning(f"未知的模型提供商: {provider}，默认使用阿里云模型")

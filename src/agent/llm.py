@@ -19,7 +19,7 @@ load_dotenv()
 ROOT_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 
-def get_ali_llm(model, base_url=None):
+def get_ali_llm(model, base_url=None,api_key=None):
     """
     获取阿里云的LLM模型
     Args:
@@ -28,13 +28,14 @@ def get_ali_llm(model, base_url=None):
         ChatOpenAI: 阿里云的LLM模型
     """
     base_url="https://dashscope.aliyuncs.com/compatible-mode/v1" if base_url is None else base_url
+    
     logger.debug(f"阿里云模型连接成功: {model}")
     logger.debug(f"阿里云模型连接地址: {base_url}")
 
     return ChatOpenAI(
-        api_key=os.getenv("API_KEY"),
-        base_url=base_url,
         model=model,
+        base_url=base_url,
+        api_key=api_key,
         streaming=True,
         # other params...
     )
@@ -43,7 +44,7 @@ def get_ali_llm(model, base_url=None):
 
 
 
-def get_zhipu_llm(model, base_url=None):
+def get_zhipu_llm(model:str, base_url:str=None,api_key:str=None):
     """
     获取智谱的LLM模型
     Args:
@@ -55,7 +56,7 @@ def get_zhipu_llm(model, base_url=None):
     logger.debug(f"智谱模型连接成功: {model}")
     logger.debug(f"智谱模型连接地址: {base_url}")   
     return ChatZhipuAI(
-        api_key=os.getenv("API_KEY"),
+        api_key=api_key,
         base_url=base_url,
         model=model,
         streaming=True,

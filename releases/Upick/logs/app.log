@@ -11,3 +11,8 @@
 2025-04-29 17:45:43,929 - Upick.agent.summary - ERROR - summary.py:151 - 摘要生成重试全部失败，返回错误响应: Invalid API key: sk-d714022a9df74f97983fb3e072ca6e47
 2025-04-29 17:45:43,930 - Upick.db.db_operate - INFO - db_operate.py:86 - 没有生成摘要... https://github.com/trending
 2025-04-29 17:45:43,930 - Upick.db.db_operate - INFO - db_operate.py:88 - 成功添加订阅并获取初始内容: https://github.com/trending
+2025-05-01 00:57:31,425 - Upick.services.scheduler - INFO - scheduler.py:73 - 已添加定时刷新任务，间隔：0小时30分钟，任务ID: refresh_content_job
+2025-05-01 00:57:31,426 - Upick.services.scheduler - INFO - scheduler.py:129 - 调度器已启动
+2025-05-01 00:57:31,537 - Upick.services.scheduler - INFO - scheduler.py:136 - 调度器已关闭
+2025-05-01 00:58:01,306 - Upick.services.scheduler - INFO - scheduler.py:73 - 已添加定时刷新任务，间隔：0小时30分钟，任务ID: refresh_content_job
+2025-05-01 00:58:01,307 - Upick.services.scheduler - INFO - scheduler.py:129 - 调度器已启动
