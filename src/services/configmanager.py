@@ -52,3 +52,26 @@ class ConfigManager:
     def force_reload(self):
         """强制重新加载配置"""
         return self.load_config()
+    
+    def save_config(self, app_config):
+        """保存应用配置
+        
+        Args:
+            app_config (dict): 应用配置字典
+        """
+        try:
+            # 更新配置
+            self.config_data['app'] = app_config
+            
+            # 保存到文件
+            with open(self.yaml_path, 'w', encoding='utf-8') as f:
+                yaml.dump(self.config_data, f, allow_unicode=True, sort_keys=False)
+            
+            # 更新最后修改时间
+            self.last_modified_time = os.path.getmtime(self.yaml_path)
+            
+            logger.info("配置已成功保存")
+            return True
+        except Exception as e:
+            logger.error(f"保存配置失败: {e}")
+            return False

@@ -218,21 +218,6 @@ def create_ui():
                     outputs=updates_container
                 )
             
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-            
             with gr.Tab("Schedule Settings"):
                 gr.Markdown("## 定时刷新设置")
                 
@@ -296,6 +281,87 @@ def create_ui():
                     inputs=[schedule_type_state, hours_input, minutes_input, hour_input, minute_input],
                     outputs=schedule_output
                 )
+
+            with gr.Tab("Configuration"):
+                gr.Markdown("## 应用配置设置")
+                
+                # 初始化配置管理器
+                from src.services.configmanager import ConfigManager
+                config_manager = ConfigManager()
+                
+                # 获取当前配置
+                current_config = config_manager.get_config()
+                if current_config is None:
+                    current_config = {}
+                app_config = current_config.get('app', {})
+                
+                # 设置默认值
+                default_values = {
+                    'log_level': 'debug',
+                    'provider': 'ZHIPU',
+                    'model': 'GLM-Z1-Flash',
+                    'base_url': '',
+                    'api_key': ''
+                }
+                
+                with gr.Row():
+                    log_level = gr.Dropdown(
+                        choices=["debug", "info", "warning", "error", "critical"],
+                        label="日志级别",
+                        value=app_config.get('log_level', default_values['log_level'])
+                    )
+                    provider = gr.Dropdown(
+                        choices=["DASHSCOPE", "ZHIPU"],
+                        label="接口厂商",
+                        value=app_config.get('provider', default_values['provider'])
+                    )
+                
+                with gr.Row():
+                    model = gr.Textbox(
+                        label="默认模型",
+                        value=app_config.get('model', default_values['model'])
+                    )
+                    base_url = gr.Textbox(
+                        label="Base URL",
+                        value=app_config.get('base_url', default_values['base_url'])
+                    )
+                
+                with gr.Row():
+                    api_key = gr.Textbox(
+                        label="API密钥",
+                        value=app_config.get('api_key', default_values['api_key']),
+                        type="password"
+                    )
+                
+                save_config_btn = gr.Button("保存配置")
+                config_output = gr.Textbox(label="配置状态")
+                
+                def save_config(log_level_val, provider_val, model_val, base_url_val, api_key_val):
+                    try:
+                        # 准备配置数据
+                        app_config = {
+                            "log_level": log_level_val,
+                            "provider": provider_val,
+                            "model": model_val,
+                            "base_url": base_url_val,
+                            "api_key": api_key_val
+                        }
+                        
+                        # 使用ConfigManager保存配置
+                        if config_manager.save_config(app_config):
+                            return "配置已成功保存！"
+                        else:
+                            return "保存配置失败，请查看日志获取详细信息"
+                    except Exception as e:
+                        logger.error(f"保存配置时出错: {str(e)}")
+                        return f"保存配置时出错: {str(e)}"
+                
+                save_config_btn.click(
+                    fn=save_config,
+                    inputs=[log_level, provider, model, base_url, api_key],
+                    outputs=config_output
+                )
+            
     
     return app
 

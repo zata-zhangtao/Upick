@@ -27,7 +27,7 @@ def get_ali_llm(model, base_url=None,api_key=None):
     Returns:
         ChatOpenAI: 阿里云的LLM模型
     """
-    base_url="https://dashscope.aliyuncs.com/compatible-mode/v1" if base_url is None else base_url
+    base_url="https://dashscope.aliyuncs.com/compatible-mode/v1" if not base_url else base_url
     
     logger.debug(f"阿里云模型连接成功: {model}")
     logger.debug(f"阿里云模型连接地址: {base_url}")
@@ -52,7 +52,9 @@ def get_zhipu_llm(model:str, base_url:str=None,api_key:str=None):
     Returns:
         ChatOpenAI: 智谱的LLM模型
     """
-    base_url="https://open.bigmodel.cn/api/paas/v4/chat/completions" if base_url is None else base_url
+
+
+    base_url="https://open.bigmodel.cn/api/paas/v4/chat/completions" if not base_url else base_url
     logger.debug(f"智谱模型连接成功: {model}")
     logger.debug(f"智谱模型连接地址: {base_url}")   
     return ChatZhipuAI(
