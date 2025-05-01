@@ -59,6 +59,21 @@ def create_ui():
         .content li {
             margin-bottom: 6px;
         }
+        .url-list {
+            margin-top: 4px;
+            margin-left: 16px;
+            font-size: 0.875rem;
+        }
+        .url-link {
+            display: block;
+            color: #3b82f6;
+            text-decoration: none;
+            margin-bottom: 2px;
+            word-break: break-all;
+        }
+        .url-link:hover {
+            text-decoration: underline;
+        }
         .empty-state {
             background-color: #f9fafb;
             border-radius: 8px;
@@ -137,8 +152,19 @@ def create_ui():
                                     pass
                             
                             content = changes.get('key_points', '')
+                            url_list = changes.get('url_list', [])
                             if isinstance(content, list):
-                                content_html = '<ol>' + ''.join([f'<li>{point}</li>' for point in content]) + '</ol>'
+                                content_html = '<ol>'
+                                for i, point in enumerate(content):
+                                    content_html += f'<li>{point}'
+                                    # 添加对应的URL列表
+                                    if i < len(url_list) and url_list[i]:
+                                        content_html += '<div class="url-list">'
+                                        for url in url_list[i]:
+                                            content_html += f'<a href="{url}" target="_blank" class="url-link">{url}</a>'
+                                        content_html += '</div>'
+                                    content_html += '</li>'
+                                content_html += '</ol>'
                             else:
                                 content_html = content
                             

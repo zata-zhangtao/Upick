@@ -19,6 +19,14 @@ def add_subscription(url:str, check_interval:int)->str:
         str: A message indicating the result of the operation.
     """
 
+
+    if not url:
+        return "Please enter a valid URL"
+    
+    # Check if URL has a valid format
+    if not url.startswith(('http://', 'https://')):
+        return "Invalid URL format. URL must start with http:// or https://"
+
     conn = sqlite3.connect(SUBSCRIPTIONS_DB_PATH)
     c = conn.cursor()
 
@@ -65,6 +73,11 @@ def add_subscription(url:str, check_interval:int)->str:
                 """, (subscription_id, "None", content_id, 0, content_json))
         
         #   如果内容为空，则返回失败
+        logger.debug(f"Content details: {content}")
+        logger.debug(f"Content type: {type(content)}")
+        logger.debug(f"Content length: {len(content) if content else 0}")
+        if content and len(content) > 0:
+            logger.debug(f"First content item: {content[0]}")
         if content is None or  len(content) == 0 or content[0]["content"] is None or  content[0]["content"].startswith("Failed to retrieve content ") or "404" in content[0]["content"] or "502" in content[0]["content"]:
             conn.commit()
             conn.close()

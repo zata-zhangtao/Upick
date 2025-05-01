@@ -14,11 +14,11 @@ logger = get_logger("agent.summary")
 
 
 
-
 # 定义 Pydantic 模型用于输出解析
 class SummaryResponse(BaseModel):
     content: List[str] = Field(default_factory=list, description="内容更新概要")
     key_points: List[str] = Field(default_factory=list, description="关键点列表")
+    url_list: List[List[str]] = Field(default_factory=list, description="每个关键点对应的URL列表")
     word_count: int = Field(default=0, description="内容字数统计")
     generated_at: str = Field(default="", description="生成时间")
     status: str = Field(default="success", description="处理状态")
@@ -72,12 +72,14 @@ class SubscriptionAgent:
 
             ###注意，有些内容的可能仅仅是时间或者数据的变化，这样的内容更新是不需要总结的，可以看作没有更新，返回空数组
             ###注意：content和key_points的列表长度应当一致，也就是他们是一一对应关系
+            ###注意：url_list是一个二维数组，每个元素对应key_points中的一个元素，包含该关键点中提到的所有URL
             ###要求：
             1. 提供内容更新概要（content），用数组形式返回。
             2. 提取每个内容的关键点（key_points），每个关键点应简洁且突出重点。
-            3. 计算 content 字段的总字数（仅统计中文和英文字符，不包括标点和空格）。
-            4. 返回结果使用中文，如果没有实质性更新或关键点，返回空数组。
-            5. 严格按照以下 JSON 格式返回结果，不添加任何多余的说明文字或注释：
+            3. 从内容中提取每个关键点相关的URL（url_list），如果没有URL则返回空数组。
+            4. 计算 content 字段的总字数（仅统计中文和英文字符，不包括标点和空格）。
+            5. 返回结果使用中文，如果没有实质性更新或关键点，返回空数组。
+            6. 严格按照以下 JSON 格式返回结果，不添加任何多余的说明文字或注释：
             {format_instructions}
             """
         )
@@ -112,6 +114,9 @@ class SubscriptionAgent:
                 # 执行 LLM 调用获取原始响应
                 chain = self.prompt_template | self.llm
                 raw_response = chain.invoke({"contentdiff": contentdiff})
+                # Log the complete prompt being sent to the LLM
+                complete_prompt = self.prompt_template.format(contentdiff=contentdiff, format_instructions=self.parser.get_format_instructions())
+                logger.debug(f"Complete prompt sent to LLM: {complete_prompt}")  # Log first 200 chars to avoid excessive logging
                 logger.debug(f"llm——raw_response: {raw_response}")
 
 

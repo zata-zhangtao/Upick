@@ -7,6 +7,7 @@ from typing import Dict, List, Any, Optional
 from bs4 import BeautifulSoup, Tag
 from .base import BaseCrawler
 from src.log import get_logger
+from . import utils
 logger = get_logger("crawler.arxiv")
 
 
@@ -89,63 +90,55 @@ class ArxivCrawler(BaseCrawler):
         Returns:
             Dictionary containing the paper's information
         """
-        paper = {}
-        
         # 提取arXiv URL和ID
         # Extract arXiv URL and ID
         paper_link = dt_tag.find("a", href=True, title="Abstract")
-        if paper_link:
-            paper["arxiv_url"] = "https://arxiv.org" + paper_link["href"] if not paper_link["href"].startswith("http") else paper_link["href"]
-            paper["arxiv_id"] = paper_link.text.strip()
+        if not paper_link:
+            return None
+            
+        arxiv_url = "https://arxiv.org" + paper_link["href"] if not paper_link["href"].startswith("http") else paper_link["href"]
         
         # 从dd标签提取元数据
         # Extract metadata from dd tag
         meta_div = dd_tag.find("div", class_="meta")
         if not meta_div:
-            return paper
+            return None
         
         # 提取标题
         # Extract title
         title_div = meta_div.find("div", class_="list-title mathjax")
+        title = ""
         if title_div:
             title_text = title_div.get_text(strip=True)
             if "Title:" in title_text:
                 title_text = title_text.split("Title:", 1)[1].strip()
-            paper["title"] = title_text
+            title = title_text
         
         # 提取摘要
         # Extract abstract
-        abstract = meta_div.find("p", class_="mathjax")
-        if abstract:
-            paper["abstract"] = abstract.get_text(strip=True)
-        
-        # 提取评论
-        # Extract comments
-        comments_div = meta_div.find("div", class_="list-comments mathjax")
-        if comments_div:
-            comments_text = comments_div.get_text(strip=True)
-            if "Comments:" in comments_text:
-                comments_text = comments_text.split("Comments:", 1)[1].strip()
-            paper["comments"] = comments_text
+        abstract = ""
+        abstract_tag = meta_div.find("p", class_="mathjax")
+        if abstract_tag:
+            abstract = abstract_tag.get_text(strip=True)
         
         # 提取作者
         # Extract authors
+        authors = []
         authors_div = meta_div.find("div", class_="list-authors")
         if authors_div:
             authors = [a.get_text(strip=True) for a in authors_div.find_all("a")]
-            paper["authors"] = authors
         
-        # 提取主题
-        # Extract subjects
-        subjects_div = meta_div.find("div", class_="list-subjects")
-        if subjects_div:
-            subjects_text = subjects_div.get_text(strip=True)
-            if "Subjects:" in subjects_text:
-                subjects_text = subjects_text.split("Subjects:", 1)[1].strip()
-            paper["subjects"] = subjects_text
+        # 构建内容字符串
+        # Build content string
+        content = f"Title: {title}\n\n"
+        content += f"Authors: {', '.join(authors)}\n\n"
+        content += f"Abstract: {abstract}"
         
-        return paper 
-    
+        return {
+            "url": arxiv_url,
+            "content": content,
+            "timestamp": utils.get_current_timestamp()
+        }
     
 def main():
     """
