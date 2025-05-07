@@ -48,6 +48,10 @@ class SubscriptionAgent:
                 self.llm = get_ali_llm(model_name, base_url,api_key)
                 logger.info(f"使用阿里云模型: {model_name}")
             elif provider == "ZHIPU":
+                if not api_key:
+                    from dotenv import load_dotenv
+                    load_dotenv()
+                    api_key = os.getenv("ZHIPU_API_KEY")
                 self.llm = get_zhipu_llm(model_name, base_url,api_key)
                 logger.info(f"使用智谱模型: {model_name}")
             else:

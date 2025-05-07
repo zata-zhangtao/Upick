@@ -8,3 +8,5 @@ releases/Upick/site-packages
 releases/Upick/script
 test*
 releases/Upick_windows_64x.zip
+resources/database/subscriptions.db-journal
+releases/Upick/logs/

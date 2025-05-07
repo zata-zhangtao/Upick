@@ -16,6 +16,6 @@ app:
   api_base:  # API基础URL，可根据不同厂商调整，默认设置为空，会根据provider自动设置；不为空时，会根据api_base设置
   model: GLM-Z1-Flash # 默认模型  不要改动，其他的不行
   base_url:
-  api_key:  d894dc7e2f8d43a6a582550642722a94.XVT8zLPYiZ2bJxzS  # API密钥，可根据不同厂商调整，默认设置为空，会根据provider自动设置；不为空时，会根据api_key设置
+  api_key:    # API密钥，可根据不同厂商调整，默认设置为空，会根据provider自动设置；不为空时，会根据api_key设置
 
 
