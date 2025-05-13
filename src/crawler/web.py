@@ -33,12 +33,15 @@ class WebCrawler(BaseCrawler):
         """
         Detect the encoding of the webpage content.
         
+        - 自动检测网页内容的字符编码，确保网页内容能够被正确解析和显示
+        - 处理不同网站可能使用的不同编码方式
+        
         Args:
             response: HTTP response object
             content: Raw content bytes
             
         Returns:
-            Detected character encoding
+            Detected character encoding 返回编码
         """
         if 'charset' in response.headers.get('content-type', '').lower():
             return response.apparent_encoding
@@ -66,11 +69,15 @@ class WebCrawler(BaseCrawler):
         """
         Clean HTML content by removing unwanted elements and attributes.
         
+        - 移除不必要的HTML元素和属性
+        - 保留文本内容，确保网页内容能够被正确解析和显示
+        - 保留链接（a标签）的URL信息
+        
         Args:
             soup: BeautifulSoup object containing the parsed HTML
             
         Returns:
-            Clean text content
+            Clean text content with preserved links
         """
         for tag in soup.find_all(['style', 'script']):
             tag.decompose()
@@ -79,6 +86,16 @@ class WebCrawler(BaseCrawler):
             if 'style' in tag.attrs:
                 del tag['style']
         
+        # Preserve links by adding URL in parentheses after link text
+        for a_tag in soup.find_all('a', href=True):
+            href = a_tag.get('href')
+            if href and not href.startswith('#') and not href.startswith('javascript:'):
+                # If the link already has text, append the URL in parentheses
+                if a_tag.get_text().strip():
+                    a_tag.string = f"{a_tag.get_text().strip()} ({href})"
+                else:
+                    a_tag.string = href
+        
         text = soup.get_text(separator='\n').strip()
         lines = [line.strip() for line in text.splitlines() if line.strip()]
         return '\n'.join(lines)
@@ -86,6 +103,10 @@ class WebCrawler(BaseCrawler):
     def fetch_and_clean_content(self, url: str, max_retries: int = 3) -> str:
         """
         Fetch webpage content and clean it to extract readable text.
+        - 获取网页内容并清理，提取可读的文本内容
+        - 使用自动检测的编码方式处理网页内容
+        - 移除不必要的HTML元素和属性
+        - 保留文本内容，确保网页内容能够被正确解析和显示
         
         Args:
             url: URL to fetch
@@ -116,13 +137,14 @@ class WebCrawler(BaseCrawler):
     def fetch_structured_content(self, url: str, max_retries: int = 3) -> Dict[str, Any]:
         """
         Fetch webpage content and return a structured object with metadata.
+        - 根据fetch_and_clean_content获取的内容，并返回结构化对象，包含元数据
         
         Args:
             url: URL to fetch
             max_retries: Maximum number of retries on failure
             
         Returns:
-            Dictionary with content and metadata
+            Dictionary with content and metadata 返回包含内容和元数据的字典
         """
         content = self.fetch_and_clean_content(url, max_retries)
         
@@ -139,15 +161,15 @@ class WebCrawler(BaseCrawler):
     def crawl(self, url: str) -> List[Dict[str, Any]]:
         """
         Crawl the specified URL and extract data.
-        
-        This method first checks if there's a specialized crawler for the URL.
-        If not, it falls back to the general web crawler.
+        - 爬取指定URL并提取数据
+        - 如果存在专门的爬虫，则使用专门的爬虫
+        - 如果不存在专门的爬虫，则使用通用的爬虫
         
         Args:
             url: URL to crawl
             
         Returns:
-            List of dictionaries containing the extracted data
+            List of dictionaries containing the extracted data 返回包含提取数据的列表
         """
         # Check if there's a specialized crawler for this URL
         specialized_crawler_class = registry.get_crawler(url)

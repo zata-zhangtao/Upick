@@ -12,6 +12,38 @@ logger = get_logger("db.db_operate")
 
 def add_subscription(url:str, check_interval:int)->str:
     """添加订阅   Add new subscription to database and fetch initial content or update check interval if URL exists
+    flowchart TD
+        A[开始] --> B{URL是否为空?}
+        B -->|是| C[返回错误: 请输入有效URL]
+        B -->|否| D{URL格式是否正确?}
+        D -->|否| E[返回错误: URL必须以http://或https://开头]
+        D -->|是| F[连接数据库]
+        F --> G{URL是否已存在?}
+        
+        G -->|是| H[更新检查间隔]
+        H --> I[提交事务并关闭连接]
+        I --> J[返回更新成功消息]
+        
+        G -->|否| K[添加新订阅]
+        K --> L[获取初始内容]
+        L --> src.crawler.WebCrawler-->L
+        L --> M[存储内容到数据库]
+        M --> N[更新最后更新时间]
+        N --> O[插入content_updates记录]
+        
+        O --> P{内容是否有效?}
+        P -->|否| Q[提交事务并关闭连接]
+        Q --> R[返回获取内容失败消息]
+        
+        P -->|是| S[生成摘要]
+        S -->src.agent.generate_summary -->S
+        S --> T{摘要是否生成成功?}
+        T -->|是| U[存储摘要到数据库]
+        T -->|否| V[记录未生成摘要日志]
+        U --> W[提交事务并关闭连接]
+        V --> W
+        W --> X[返回添加成功消息]
+  
     Args:
         url (str): The URL of the subscription.
         check_interval (int): The interval in minutes between checks.

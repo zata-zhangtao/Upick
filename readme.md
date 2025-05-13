@@ -7,8 +7,14 @@
 2. 进入项目路径，然后使用一些命令进行安装(需要提前安装conda, 3.10 <= python version <= 3.12)
 ```bash
 conda create -n Upick python=3.11
+
 conda activate Upick
-pip install -r requirements.txt
+
+# 跳过安装失败的依赖，使用清华源
+while read requirement; do
+    pip install "$requirement" -i https://pypi.tuna.tsinghua.edu.cn/simple || echo "Failed to install $requirement, continuing..."
+done < requirements.txt
+
 python run.py
 ```
 
