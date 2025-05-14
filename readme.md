@@ -3,8 +3,8 @@
 
 
 ### conda install
-1. 将本项目下载并解压
-2. 进入项目路径，然后使用一些命令进行安装(需要提前安装conda, 3.10 <= python version <= 3.12)
+
+进入项目路径，然后使用一些命令进行安装(需要提前安装conda, 3.10 <= python version <= 3.12)
 ```bash
 conda create -n Upick python=3.11
 
@@ -17,6 +17,20 @@ done < requirements.txt
 
 python run.py
 ```
+
+### uv install
+
+```sh
+pip install uv 
+uv venv
+source .venv/bin/activate
+uv pip install -r requirements.txt
+python run.py
+```
+
+
+
+
 
 ### windows exe
 
