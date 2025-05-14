@@ -4,21 +4,39 @@
 
 ## 待完成
 
+
 ### bug
 
 - 卡片的左上角url有问题
   ![url问题](images/DevProcess/image.png)
 
+- ai生成了很多无效url，需要修复
+  ![无效url问题](images/DevProcess/image-1.png)
+
+### 优化
+
+- 更新的时候status一直空闲，可以拿来展示日志
+  ![status框](images/DevProcess/image-2.png)
+
+- 更新的时候是顺序执行的，太慢了，可以用异步操作
+  ![优化更新速度](images/DevProcess/image-3.png)
+
+
 
 ### 功能
 
+
+- 一键重新生成总结
+  ![重新生成总结](images/DevProcess/image-4.png)
+
+- 特定需求重新总结或者对话
+  ![通过对话重新总结](images/DevProcess/image-5.png)
 
 - [ ] 实现用户订阅功能
   - [ ] 创建订阅界面
   - [ ] 添加邮件通知
 - [ ] 数据管理功能
   - [ ] 批量导入/导出
-  - [ ] 数据清理工具
 - [ ] 改进用户界面
   - [ ] 小程序适配
 - [ ] Agent完善，
