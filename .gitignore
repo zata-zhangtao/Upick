@@ -11,3 +11,4 @@ releases/Upick_windows_64x.zip
 resources/database/subscriptions.db-journal
 releases/Upick/logs/
 *.DS_Store
+resources/learning_data

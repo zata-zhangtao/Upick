@@ -14,6 +14,8 @@ from pydantic import BaseModel, Field
 from typing import List, Optional
 from src.log import get_logger
 from src.agent.llm import get_ali_llm, get_zhipu_llm
+from src.agent.incremental_learning import IncrementalLearner
+
 logger = get_logger("agent.summary")
 
 
@@ -38,6 +40,9 @@ class SubscriptionAgent:
             retry_delay: 重试间隔时间（秒）
         """
         self.max_token_limit = max_token_limit
+        # 初始化增量学习器
+        self.learner = IncrementalLearner()
+        
         # 根据配置文件选择模型
         if llm_model:
             self.llm = llm_model
@@ -71,9 +76,9 @@ class SubscriptionAgent:
         # 定义 Pydantic 输出解析器
         self.parser = PydanticOutputParser(pydantic_object=SummaryResponse)
         
-        # 定义提示模板，进一步优化以确保提取 key_points
+        # 定义提示模板
         self.prompt_template = PromptTemplate(
-            input_variables=["contentdiff"],
+            input_variables=["contentdiff", "similar_examples"],
             partial_variables={"format_instructions": self.parser.get_format_instructions()},
             template="""
             你是一个订阅号运营专家，可以根据差异内容总结出订阅内容的更新情况。请对以下内容差异进行总结：
@@ -82,22 +87,28 @@ class SubscriptionAgent:
             ###注意，有些内容的可能仅仅是时间或者数据的变化，这样的内容更新是不需要总结的，可以看作没有更新，返回空数组
             ###注意：content和key_points的列表长度应当一致，也就是他们是一一对应关系
             ###注意：url_list是一个二维数组，每个元素对应key_points中的一个元素，包含该关键点中提到的所有URL
+
+            ###历史学习示例：
+            {similar_examples}
+
             ###要求：
             1. 提供内容更新概要（content），用数组形式返回。
             2. 提取每个内容的关键点（key_points），每个关键点应简洁且突出重点。
             3. 从内容中提取每个关键点相关的URL（url_list），如果没有URL则返回空数组。
             4. 计算 content 字段的总字数（仅统计中文和英文字符，不包括标点和空格）。
             5. 返回结果使用中文，如果没有实质性更新或关键点，返回空数组。
-            6. 严格按照以下 JSON 格式返回结果，不添加任何多余的说明文字或注释：
+            6. 参考历史学习示例中的成功案例，保持一致的总结风格。
+            7. 严格按照以下 JSON 格式返回结果，不添加任何多余的说明文字或注释：
             {format_instructions}
             """
         )
 
-                # 初始化 Langchain 记忆组件
+        # 初始化 Langchain 记忆组件
         self.memory = ConversationSummaryBufferMemory(
             llm=self.llm,
             max_token_limit=self.max_token_limit,
-            return_messages=True
+            return_messages=True,
+            verbose=True
         )
 
 
@@ -120,6 +131,12 @@ class SubscriptionAgent:
         返回:
             SummaryResponse: 包含摘要内容的 Pydantic 模型
         """
+        # 获取相似的历史示例
+        similar_examples = self.learner.get_similar_examples(contentdiff)
+        similar_examples_text = "\n".join([
+            f"输入: {ex.input_text}\n输出: {ex.output_text}\n反馈分数: {ex.feedback_score}"
+            for ex in similar_examples
+        ])
 
         # 估算 token 数量
         avg_token_per_char = 0.5
@@ -130,8 +147,6 @@ class SubscriptionAgent:
             logger.info(f"内容估计 token 数 ({int(estimated_tokens)}) 超过限制 ({self.max_token_limit})，使用内存处理")
             return self.generate_summary_with_memory(contentdiff)
 
-
-
         logger.debug(f"开始生成摘要...")
         retries = 0
         last_exception = None
@@ -141,13 +156,13 @@ class SubscriptionAgent:
             try:
                 # 执行 LLM 调用获取原始响应
                 chain = self.prompt_template | self.llm
-                raw_response = chain.invoke({"contentdiff": contentdiff})
-                # Log the complete prompt being sent to the LLM
-                complete_prompt = self.prompt_template.format(contentdiff=contentdiff, format_instructions=self.parser.get_format_instructions())
-                logger.debug(f"Complete prompt sent to LLM: {complete_prompt}")  # Log first 200 chars to avoid excessive logging
-                logger.debug(f"llm——raw_response: {raw_response}")
+                raw_response = chain.invoke({
+                    "contentdiff": contentdiff,
+                    "similar_examples": similar_examples_text
+                })
 
-
+                logger.debug(f"similar_examples: {similar_examples_text}")
+                
                 # 检查并提取原始内容
                 raw_content = raw_response.content if hasattr(raw_response, 'content') else str(raw_response)
                 json_content = self.extract_json(raw_content)
@@ -165,7 +180,7 @@ class SubscriptionAgent:
                 
                 # 添加原始响应到结果中
                 response.raw_response = raw_content
-                logger.debug(f"摘要生成成功")
+                logger.debug(f"摘要生成成功: {raw_content}")
                 
                 return response
 
@@ -408,6 +423,35 @@ class SubscriptionAgent:
             raw_response=str(raw_response) if raw_response else "No response"
         )
 
+    def save_feedback(self, input_text: str, output_text: str | List[str], feedback_score: float, metadata: dict = None):
+        """
+        保存用户反馈用于增量学习
+        Args:
+            input_text: 原始输入文本
+            output_text: 生成的输出文本（字符串或字符串列表）
+            feedback_score: 反馈分数 (0-1)
+            metadata: 额外的元数据
+        """
+        # 如果output_text是列表，将其转换为字符串
+        if isinstance(output_text, list):
+            output_text = "\n".join(output_text)
+            
+        self.learner.save_example(
+            input_text=input_text,
+            output_text=output_text,
+            feedback_score=feedback_score,
+            metadata=metadata
+        )
+        logger.info(f"保存反馈，反馈分数: {feedback_score}")
+
+    def get_learning_stats(self):
+        """
+        获取学习统计信息
+        Returns:
+            Dict: 学习统计信息
+        """
+        return self.learner.get_learning_statistics()
+
 
 
 # 使用示例
@@ -418,7 +462,6 @@ def main():
     """
 
     # 将示例内容重复20倍以测试大内容处理能力
-
     if True:
         sample_contentdiff = sample_contentdiff * 20
         
@@ -436,6 +479,14 @@ def main():
     
     # 打印调试信息
     print(json.dumps(summary_result.model_dump(), indent=2, ensure_ascii=False))
+
+    # 保存用户反馈
+    agent.save_feedback(
+        input_text=sample_contentdiff,
+        output_text=summary_result.content,  # 这里传入的是列表，会被自动转换为字符串
+        feedback_score=0.8,
+        metadata={"user_id": "user123"}
+    )
 
 if __name__ == "__main__":
     main()
