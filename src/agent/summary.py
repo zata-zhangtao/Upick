@@ -11,7 +11,7 @@ from langchain_core.messages import SystemMessage
 import json
 import re
 from pydantic import BaseModel, Field
-from typing import List, Optional
+from typing import List, Optional, Dict, Any
 from src.log import get_logger
 from src.agent.llm import get_ali_llm, get_zhipu_llm
 from src.agent.incremental_learning import IncrementalLearner
@@ -30,6 +30,7 @@ class SummaryResponse(BaseModel):
     status: str = Field(default="success", description="处理状态")
     error_message: Optional[str] = Field(default=None, description="错误信息")
     raw_response: Optional[str] = Field(default=None, description="原始响应")
+    learning_examples: Optional[List[Dict[str, Any]]] = Field(default=None, description="使用的学习示例")
 
 class SubscriptionAgent:
     def __init__(self, llm_model=None, max_retries=3, retry_delay=2, max_token_limit=30000):
@@ -97,8 +98,9 @@ class SubscriptionAgent:
             3. 从内容中提取每个关键点相关的URL（url_list），如果没有URL则返回空数组。
             4. 计算 content 字段的总字数（仅统计中文和英文字符，不包括标点和空格）。
             5. 返回结果使用中文，如果没有实质性更新或关键点，返回空数组。
-            6. 参考历史学习示例中的成功案例，保持一致的总结风格。
-            7. 严格按照以下 JSON 格式返回结果，不添加任何多余的说明文字或注释：
+            6. 参考历史学习示例中的成功案例，特别关注那些评分较高的示例，模仿其摘要风格和关键点提取方式。
+            7. 优先选取评分大于0.8的高质量示例作为参考模板。
+            8. 严格按照以下 JSON 格式返回结果，不添加任何多余的说明文字或注释：
             {format_instructions}
             """
         )
@@ -131,12 +133,34 @@ class SubscriptionAgent:
         返回:
             SummaryResponse: 包含摘要内容的 Pydantic 模型
         """
-        # 获取相似的历史示例
-        similar_examples = self.learner.get_similar_examples(contentdiff)
-        similar_examples_text = "\n".join([
-            f"输入: {ex.input_text}\n输出: {ex.output_text}\n反馈分数: {ex.feedback_score}"
-            for ex in similar_examples
+        # 获取相似的历史示例，特别关注高评分示例
+        similar_examples = self.learner.get_similar_examples(contentdiff, top_k=5)
+        
+        # 过滤并优先使用评分高的示例
+        high_rated_examples = [ex for ex in similar_examples if ex.feedback_score >= 0.8]
+        if high_rated_examples:
+            logger.info(f"找到 {len(high_rated_examples)} 个高评分学习示例")
+            selected_examples = high_rated_examples
+        else:
+            logger.info("没有找到高评分学习示例，使用所有相似示例")
+            selected_examples = similar_examples
+
+        # 构建示例文本，包含评分信息以便模型参考
+        similar_examples_text = "\n\n".join([
+            f"示例 {i+1} (评分: {ex.feedback_score:.1f}):\n输入: {ex.input_text[:200]}...\n输出: {ex.output_text}\n"
+            for i, ex in enumerate(selected_examples)
         ])
+        
+        # 记录使用的学习示例，以便后续分析
+        used_examples = [
+            {
+                "input_text": ex.input_text[:100] + "...",
+                "output_text": ex.output_text,
+                "feedback_score": ex.feedback_score,
+                "similarity_score": ex.metadata.get('similarity_score', 0)
+            }
+            for ex in selected_examples
+        ]
 
         # 估算 token 数量
         avg_token_per_char = 0.5
@@ -145,7 +169,9 @@ class SubscriptionAgent:
         # 如果内容可能超出 token 限制，使用带内存的处理方法
         if estimated_tokens > self.max_token_limit:
             logger.info(f"内容估计 token 数 ({int(estimated_tokens)}) 超过限制 ({self.max_token_limit})，使用内存处理")
-            return self.generate_summary_with_memory(contentdiff)
+            response = self.generate_summary_with_memory(contentdiff)
+            response.learning_examples = used_examples
+            return response
 
         logger.debug(f"开始生成摘要...")
         retries = 0
@@ -180,6 +206,9 @@ class SubscriptionAgent:
                 
                 # 添加原始响应到结果中
                 response.raw_response = raw_content
+                # 添加使用的学习示例
+                response.learning_examples = used_examples
+                
                 logger.debug(f"摘要生成成功: {raw_content}")
                 
                 return response
@@ -202,7 +231,8 @@ class SubscriptionAgent:
             generated_at=datetime.now().isoformat(),
             status="error",
             error_message=f"Failed to parse SummaryResponse: {str(last_exception)}",
-            raw_response=raw_content
+            raw_response=raw_content,
+            learning_examples=used_examples
         )
 
     def chunking_content(self, contentdiff: str) -> List[str]:
@@ -332,16 +362,44 @@ class SubscriptionAgent:
             except Exception as e:
                 logger.error(f"块处理失败: {e}")
                 continue
+
+        # 获取相似的历史示例作为参考
+        similar_examples = self.learner.get_similar_examples(contentdiff, top_k=3)
+        # 优先选择高评分示例
+        high_rated_examples = [ex for ex in similar_examples if ex.feedback_score >= 0.8]
+        if high_rated_examples:
+            selected_examples = high_rated_examples
+        else:
+            selected_examples = similar_examples
+            
+        similar_examples_text = "\n\n".join([
+            f"示例 {i+1} (评分: {ex.feedback_score:.1f}):\n输入: {ex.input_text[:100]}...\n输出: {ex.output_text}\n"
+            for i, ex in enumerate(selected_examples)
+        ])
+        
+        # 记录使用的学习示例
+        used_examples = [
+            {
+                "input_text": ex.input_text[:100] + "...",
+                "output_text": ex.output_text,
+                "feedback_score": ex.feedback_score,
+                "similarity_score": ex.metadata.get('similarity_score', 0)
+            }
+            for ex in selected_examples
+        ]
         
         # 最终使用收集的信息构建符合Pydantic模型的结果
         final_prompt_template = PromptTemplate(
-            input_variables=["collected_content", "collected_key_points", "collected_urls", "format_instructions"],
+            input_variables=["collected_content", "collected_key_points", "collected_urls", "similar_examples", "format_instructions"],
             template="""
             根据以下收集的信息，生成最终摘要：
             
             内容更新概要: {collected_content}
             关键点列表: {collected_key_points}
             URL列表: {collected_urls}
+            
+            ###历史学习示例：
+            {similar_examples}
             
             请严格按以下格式返回JSON结果：
             {format_instructions}
@@ -351,7 +409,8 @@ class SubscriptionAgent:
             2. url_list 是二维数组，对应每个 key_point 中的URL
             3. 计算 word_count (内容字符总数，不含标点和空格)
             4. 如果发现重复内容，请合并或删除
-            5. 只返回JSON，不要添加额外说明
+            5. 参考历史学习示例中高评分示例的摘要风格
+            6. 只返回JSON，不要添加额外说明
             """
         )
         
@@ -370,6 +429,7 @@ class SubscriptionAgent:
                     "collected_content": collected_content,
                     "collected_key_points": collected_key_points,
                     "collected_urls": collected_urls,
+                    "similar_examples": similar_examples_text,
                     "format_instructions": self.parser.get_format_instructions()
                 })
                 
@@ -397,8 +457,9 @@ class SubscriptionAgent:
                     for _ in range(len(response.key_points) - len(response.url_list)):
                         response.url_list.append([])
                 
-                # 添加原始响应
+                # 添加原始响应和学习示例
                 response.raw_response = raw_content
+                response.learning_examples = used_examples
                 logger.debug(f"使用记忆功能摘要生成成功")
                 
                 return response
@@ -420,7 +481,8 @@ class SubscriptionAgent:
             generated_at=datetime.now().isoformat(),
             status="error",
             error_message=f"使用记忆功能摘要生成失败: {str(last_exception)}",
-            raw_response=str(raw_response) if raw_response else "No response"
+            raw_response=str(raw_response) if raw_response else "No response",
+            learning_examples=used_examples
         )
 
     def save_feedback(self, input_text: str, output_text: str | List[str], feedback_score: float, metadata: dict = None):

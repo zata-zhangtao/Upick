@@ -248,7 +248,7 @@ def get_updates() -> List[Tuple[str, str, str, str]]:
     
     # Query for content updates joined with subscription information and summaries
     c.execute("""
-        SELECT cu.diff_details, s.summary, cu.updated_at, sub.url
+        SELECT cu.diff_details, s.summary, cu.updated_at, sub.url, cu.id, s.id
         FROM content_updates cu
         JOIN subscriptions sub ON cu.subscription_id = sub.id
         JOIN summaries s ON s.content_update_id = cu.id
@@ -261,8 +261,8 @@ def get_updates() -> List[Tuple[str, str, str, str]]:
     
     # Format updates into a more readable structure
     formatted_updates = []
-    for diff_details, summary, updated_at, url in updates:
-        formatted_updates.append([url, updated_at, summary, diff_details])
+    for diff_details, summary, updated_at, url, content_update_id, summary_id in updates:
+        formatted_updates.append([url, updated_at, summary, diff_details, content_update_id, summary_id])
     
     return formatted_updates
 
@@ -447,6 +447,96 @@ def delete_old_content(days_to_keep: int = 30) -> str:
         conn.close()
         logger.error(f"删除旧内容时出错: {str(e)}")
         return f"Error deleting old content: {str(e)}"
+
+def save_summary_feedback(summary_id: int, feedback_score: float, feedback_comment: str = None) -> str:
+    """保存摘要反馈   Save feedback for a summary to be used in incremental learning
+    
+    Args:
+        summary_id (int): The ID of the summary
+        feedback_score (float): A score between 0.0 and 1.0 indicating quality
+        feedback_comment (str, optional): Optional comment about the summary
+        
+    Returns:
+        str: A message indicating success or failure
+    """
+    if not isinstance(feedback_score, (int, float)) or feedback_score < 0 or feedback_score > 1:
+        return "Feedback score must be a number between 0 and 1"
+    
+    conn = sqlite3.connect(SUBSCRIPTIONS_DB_PATH)
+    c = conn.cursor()
+    
+    try:
+        # Check if the summary exists
+        c.execute("SELECT id, content_update_id FROM summaries WHERE id = ?", (summary_id,))
+        result = c.fetchone()
+        
+        if not result:
+            conn.close()
+            return f"No summary found with ID {summary_id}"
+        
+        content_update_id = result[1]
+        
+        # Get the diff_details for the content update (for incremental learning)
+        c.execute("SELECT diff_details FROM content_updates WHERE id = ?", (content_update_id,))
+        diff_result = c.fetchone()
+        
+        if not diff_result:
+            conn.close()
+            return f"No content update found with ID {content_update_id}"
+        
+        diff_details = diff_result[0]
+        
+        # Update the summary with feedback
+        current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        c.execute("""
+            UPDATE summaries
+            SET feedback_score = ?, feedback_comment = ?, feedback_at = ?
+            WHERE id = ?
+        """, (feedback_score, feedback_comment, current_time, summary_id))
+        
+        conn.commit()
+        
+        # Call the incremental learning function with the feedback
+        from src.agent.summary import SubscriptionAgent
+        
+        # Get the summary content
+        c.execute("SELECT summary FROM summaries WHERE id = ?", (summary_id,))
+        summary_content = c.fetchone()[0]
+        
+        # Extract summary data
+        try:
+            summary_data = json.loads(summary_content)
+            key_points = summary_data.get('key_points', [])
+            key_points_text = "\n".join(key_points) if isinstance(key_points, list) else str(key_points)
+            
+            # Create metadata
+            metadata = {
+                "summary_id": summary_id,
+                "content_update_id": content_update_id,
+                "feedback_comment": feedback_comment,
+                "feedback_at": current_time
+            }
+            
+            # Save to incremental learning system
+            agent = SubscriptionAgent()
+            agent.save_feedback(
+                input_text=diff_details,
+                output_text=key_points_text,
+                feedback_score=feedback_score,
+                metadata=metadata
+            )
+        except Exception as e:
+            logger.error(f"Error saving to incremental learning: {str(e)}")
+            # Continue anyway - we still want to save the feedback to the database
+        
+        conn.close()
+        return f"Successfully saved feedback for summary {summary_id}"
+        
+    except Exception as e:
+        conn.rollback()
+        conn.close()
+        logger.error(f"Error saving summary feedback: {str(e)}")
+        return f"Error saving feedback: {str(e)}"
 
 
 

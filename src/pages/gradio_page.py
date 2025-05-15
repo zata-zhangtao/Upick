@@ -1,13 +1,17 @@
 import gradio as gr
 import sqlite3
 from datetime import datetime
-from src.db import add_subscription, refresh_content, get_updates
+from src.db import add_subscription, refresh_content, get_updates, save_summary_feedback
 import json
 from src.log import get_logger
+from src.agent.incremental_learning import IncrementalLearner
+from src.agent.summary import SubscriptionAgent
+
 logger = get_logger("pages.gradio_page")
 
-
-
+# Initialize the learner and agent
+learner = IncrementalLearner()
+subscription_agent = SubscriptionAgent()
 
 def create_ui():
     """Create Gradio interface for subscription management"""
@@ -87,6 +91,19 @@ def create_ui():
             margin: 0 auto 16px;
             color: #9ca3af;
         }
+        .feedback-container {
+            margin-top: 16px;
+            padding: 16px;
+            background-color: #f9fafb;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+        }
+        .rating-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
     """) as app:
         gr.Markdown("# Subscription Manager")
         
@@ -121,6 +138,37 @@ def create_ui():
                     view_btn = gr.Button("View Updates", variant="primary")
                 
                 updates_container = gr.HTML(label="Content Updates")
+                
+                # State to store the current updates data
+                updates_data_state = gr.State([])
+                
+                # Add feedback components
+                with gr.Accordion("提供反馈", open=False) as feedback_accordion:
+                    gr.Markdown("### 给内容摘要评分")
+                    
+                    with gr.Row():
+                        update_selector = gr.Dropdown(
+                            choices=[],
+                            label="选择要评分的内容",
+                            interactive=True
+                        )
+                    
+                    with gr.Row():
+                        feedback_rating = gr.Slider(
+                            minimum=0,
+                            maximum=1,
+                            value=0.8,
+                            step=0.1,
+                            label="质量评分 (0-1)"
+                        )
+                    
+                    feedback_comment = gr.Textbox(
+                        label="反馈意见 (可选)",
+                        placeholder="请输入您对此摘要的意见或建议..."
+                    )
+                    
+                    submit_feedback_btn = gr.Button("提交反馈", variant="primary")
+                    feedback_status = gr.Textbox(label="反馈状态")
                 
                 def format_updates_as_cards(updates_data):
                     if not updates_data or len(updates_data) == 0:
@@ -229,19 +277,214 @@ def create_ui():
                                     continue
                         updates_data = filtered_updates
                     
-                    return format_updates_as_cards(updates_data)
+                    # Update dropdown options for feedback
+                    update_options = []
+                    for i, update in enumerate(updates_data):
+                        if isinstance(update, (list, tuple)) and len(update) >= 1:
+                            url = update[0]
+                            label = f"{i+1}. {url[:40]}..." if len(url) > 40 else f"{i+1}. {url}"
+                            update_options.append(label)
+                    
+                    return format_updates_as_cards(updates_data), updates_data, gr.update(choices=update_options)
                 
                 view_btn.click(
                     fn=get_updates_as_cards,
                     inputs=time_range,
-                    outputs=updates_container
+                    outputs=[updates_container, updates_data_state, update_selector]
                 )
                 
                 # 使时间范围选择实时更新
                 time_range.change(
                     fn=get_updates_as_cards,
                     inputs=time_range,
-                    outputs=updates_container
+                    outputs=[updates_container, updates_data_state, update_selector]
+                )
+                
+                # Handle feedback submission
+                def submit_feedback(selection, rating, comment, updates_data):
+                    if not selection or not updates_data:
+                        return "请选择要评分的内容"
+                    
+                    try:
+                        # Extract index from selection (format: "1. url...")
+                        index = int(selection.split('.')[0]) - 1
+                        
+                        if index < 0 or index >= len(updates_data):
+                            return "无效的选择"
+                        
+                        update = updates_data[index]
+                        url = update[0]
+                        diff_details = update[3]  # Get the diff_details from the updates_data
+                        summary_id = update[5]  # Get the summary_id from the updates_data
+                        
+                        # Save feedback using the database function
+                        result = save_summary_feedback(
+                            summary_id=summary_id,
+                            feedback_score=rating,
+                            feedback_comment=comment
+                        )
+                        
+                        return f"{result} - URL: {url}, 评分: {rating}"
+                        
+                    except Exception as e:
+                        logger.error(f"提交反馈时出错: {str(e)}")
+                        return f"提交反馈时出错: {str(e)}"
+                
+                submit_feedback_btn.click(
+                    fn=submit_feedback,
+                    inputs=[update_selector, feedback_rating, feedback_comment, updates_data_state],
+                    outputs=feedback_status
+                )
+            
+            with gr.Tab("Learning Stats"):
+                gr.Markdown("## 增量学习统计")
+                
+                refresh_stats_btn = gr.Button("刷新统计", variant="secondary")
+                
+                with gr.Row():
+                    total_examples = gr.Number(label="总学习样本数", value=0)
+                    avg_feedback = gr.Number(label="平均反馈分数", value=0)
+                
+                with gr.Row():
+                    vocab_size = gr.Number(label="词汇量", value=0)
+                    last_update = gr.Textbox(label="最后更新时间", value="")
+                
+                # Get learning statistics
+                def get_learning_stats():
+                    stats = subscription_agent.get_learning_stats()
+                    
+                    return (
+                        stats.get("total_examples", 0),
+                        stats.get("average_feedback", 0),
+                        stats.get("vocabulary_size", 0),
+                        stats.get("latest_update", "从未更新")
+                    )
+                
+                refresh_stats_btn.click(
+                    fn=get_learning_stats,
+                    inputs=[],
+                    outputs=[total_examples, avg_feedback, vocab_size, last_update]
+                )
+                
+                # Add example list and visualization
+                gr.Markdown("### 高质量学习示例")
+                
+                # Example retrieval
+                def get_high_quality_examples():
+                    examples = learner.examples
+                    
+                    # Sort by feedback score (highest first)
+                    examples.sort(key=lambda ex: ex.feedback_score, reverse=True)
+                    
+                    # Take top 10 examples
+                    top_examples = examples[:10] if len(examples) > 10 else examples
+                    
+                    # Format examples for display
+                    if not top_examples:
+                        return "暂无学习示例数据"
+                    
+                    html = "<div style='max-height: 400px; overflow-y: auto;'>"
+                    for i, ex in enumerate(top_examples):
+                        html += f"""
+                        <div style='margin-bottom: 20px; padding: 16px; border: 1px solid #e5e7eb; border-radius: 8px; background-color: white;'>
+                            <div style='font-weight: bold; margin-bottom: 8px; display: flex; justify-content: space-between;'>
+                                <span>示例 {i+1}</span>
+                                <span style='color: {"#10b981" if ex.feedback_score >= 0.8 else "#f59e0b"};'>
+                                    评分: {ex.feedback_score:.1f}
+                                </span>
+                            </div>
+                            <div style='margin-bottom: 10px;'>
+                                <div style='font-size: 0.875rem; color: #6b7280; margin-bottom: 4px;'>输入:</div>
+                                <div style='padding: 8px; background-color: #f9fafb; border-radius: 4px; max-height: 100px; overflow-y: auto;'>
+                                    {ex.input_text[:200]}...
+                                </div>
+                            </div>
+                            <div>
+                                <div style='font-size: 0.875rem; color: #6b7280; margin-bottom: 4px;'>输出:</div>
+                                <div style='padding: 8px; background-color: #f9fafb; border-radius: 4px;'>
+                                    {ex.output_text}
+                                </div>
+                            </div>
+                            <div style='font-size: 0.75rem; color: #9ca3af; margin-top: 10px;'>
+                                {ex.timestamp}
+                            </div>
+                        </div>
+                        """
+                    html += "</div>"
+                    return html
+                
+                with gr.Row():
+                    refresh_examples_btn = gr.Button("查看高质量示例", variant="secondary")
+                    examples_display = gr.HTML(label="高质量示例")
+                
+                refresh_examples_btn.click(
+                    fn=get_high_quality_examples,
+                    inputs=[],
+                    outputs=examples_display
+                )
+                
+                # Performance chart
+                gr.Markdown("### 反馈分数分布")
+                
+                def get_feedback_distribution():
+                    examples = learner.examples
+                    if not examples:
+                        return "暂无学习示例数据"
+                    
+                    # Count examples in each score range
+                    bins = {
+                        "0.0-0.2": 0,
+                        "0.2-0.4": 0,
+                        "0.4-0.6": 0,
+                        "0.6-0.8": 0,
+                        "0.8-1.0": 0
+                    }
+                    
+                    for ex in examples:
+                        score = ex.feedback_score
+                        if score < 0.2:
+                            bins["0.0-0.2"] += 1
+                        elif score < 0.4:
+                            bins["0.2-0.4"] += 1
+                        elif score < 0.6:
+                            bins["0.4-0.6"] += 1
+                        elif score < 0.8:
+                            bins["0.6-0.8"] += 1
+                        else:
+                            bins["0.8-1.0"] += 1
+                    
+                    # Create bar chart
+                    import matplotlib.pyplot as plt
+                    import io
+                    import base64
+                    
+                    fig, ax = plt.subplots(figsize=(8, 4))
+                    colors = ['#f87171', '#fbbf24', '#34d399', '#60a5fa', '#818cf8']
+                    
+                    ax.bar(bins.keys(), bins.values(), color=colors)
+                    ax.set_xlabel('反馈分数区间')
+                    ax.set_ylabel('示例数量')
+                    ax.set_title('反馈分数分布')
+                    
+                    # Save to base64 string
+                    buf = io.BytesIO()
+                    plt.savefig(buf, format='png')
+                    buf.seek(0)
+                    img_str = base64.b64encode(buf.read()).decode('utf-8')
+                    
+                    plt.close()
+                    
+                    html = f"<img src='data:image/png;base64,{img_str}' style='width:100%;'>"
+                    return html
+                
+                with gr.Row():
+                    refresh_chart_btn = gr.Button("查看分数分布", variant="secondary")
+                    chart_display = gr.HTML(label="分数分布")
+                
+                refresh_chart_btn.click(
+                    fn=get_feedback_distribution,
+                    inputs=[],
+                    outputs=chart_display
                 )
             
             with gr.Tab("Schedule Settings"):

@@ -1,10 +1,10 @@
 import os
 import sqlite3
-from .db_operate import add_subscription, refresh_content, get_updates, delete_subscription, get_subscriptions, delete_old_content
-
+from .db_operate import add_subscription, refresh_content, get_updates, delete_subscription, get_subscriptions, delete_old_content, save_summary_feedback
 from .config import SUBSCRIPTIONS_DB_PATH
+from src.log import get_logger
 
-
+logger = get_logger("db.init")
 
 __all__ = [
     "add_subscription",
@@ -13,20 +13,20 @@ __all__ = [
     "delete_subscription",
     "get_subscriptions",
     "delete_old_content",
-    "SUBSCRIPTIONS_DB_PATH"
+    "SUBSCRIPTIONS_DB_PATH",
+    "save_summary_feedback"
 ]
-
-
 
 def init_db():
     """Initialize SQLite database with subscription and content tables"""
+    logger.info("Initializing database...")
+    
     conn = sqlite3.connect(SUBSCRIPTIONS_DB_PATH)
     c = conn.cursor()
     
     # Enable timezone support
     c.execute("PRAGMA timezone='Asia/Shanghai'")
     
-
     # Create subscriptions table
     c.execute('''CREATE TABLE IF NOT EXISTS subscriptions
                  (id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -57,16 +57,20 @@ def init_db():
                   FOREIGN KEY (old_content_id) REFERENCES contents (id),
                   FOREIGN KEY (new_content_id) REFERENCES contents (id))''')
     
-    # Create summaries table
+    # Create summaries table with all columns including feedback columns
     c.execute('''CREATE TABLE IF NOT EXISTS summaries
                  (id INTEGER PRIMARY KEY AUTOINCREMENT,
                   content_update_id INTEGER NOT NULL,
                   summary TEXT NOT NULL,
+                  feedback_score REAL DEFAULT 0.0,
+                  feedback_comment TEXT,
+                  feedback_at TIMESTAMP,
                   created_at TIMESTAMP DEFAULT (datetime('now', 'localtime')),
                   FOREIGN KEY (content_update_id) REFERENCES content_updates (id))''')
     
     conn.commit()
     conn.close()
     
+    logger.info("Database initialized successfully")
 
 init_db()

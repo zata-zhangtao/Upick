@@ -18,17 +18,17 @@ def main():
     try:
         delete_record_app.queue().launch(
             server_name="127.0.0.1", 
-            server_port=7862,
+            server_port=7861,
             prevent_thread_lock=True,
             share=False,
-        )
+        ),
 
 
         
         # Launch index_page
         index_page.queue().launch(
-            server_name="127.0.0.1", 
-            server_port=7861,
+            server_name="127.0.0.1",  # 允许所有IP访问
+            server_port=7860,       # 使用一个不同的端口
             share=False
         )
     finally:
