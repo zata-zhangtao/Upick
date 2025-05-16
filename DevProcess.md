@@ -13,6 +13,10 @@
 - ai生成了很多无效url，需要修复
   ![无效url问题](images/DevProcess/image-1.png)
 
+- 评分反馈，点击确定后说没找到，刷新页面之后可以
+
+- 明明已经提交了反馈，但是learning stats里面没有内容
+
 ### 优化
 
 - 更新的时候status一直空闲，可以拿来展示日志
