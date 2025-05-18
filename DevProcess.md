@@ -13,6 +13,9 @@
 - ai生成了很多无效url，需要修复
   ![无效url问题](images/DevProcess/image-1.png)
 
+- 定时器过一段时间就失效了
+  ![定时器失败](images/DevProcess/image-6.png)
+
 - 评分反馈，点击确定后说没找到，刷新页面之后可以
 
 - 明明已经提交了反馈，但是learning stats里面没有内容
@@ -51,7 +54,7 @@
 
 ## 更新记录
 
-### v1.1.2  （ - 暂未发布）
+### v1.2.0  2025.05.18
 
 fix:
   1. 项目名从Upick改名为faintgleam
