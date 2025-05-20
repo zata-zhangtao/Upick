@@ -120,3 +120,6 @@ websockets==15.0.1
 wheel==0.45.1
 yarl==1.18.3
 zstandard==0.23.0
+sphinx==7.2.6
+sphinx-rtd-theme==2.0.0
+sphinx-autodoc-typehints==1.25.2

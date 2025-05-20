@@ -89,3 +89,8 @@ python run.py
 
 1. 如果使用智谱AI免费模型，建议使用GLM-Z1-Flash，其他的几个我试了，几乎处于不可用状态
 2. 如果配置文件yaml中想要设置为None，直接空着就行，如果填None反而是字符串的'None'
+3. 通过如下命令创建并打开api文档
+    ```bash
+    make docs/html 
+    open docs/build/html/index.html
+    ```
