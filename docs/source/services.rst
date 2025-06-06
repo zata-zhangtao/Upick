@@ -1,6 +1,14 @@
 services package
 ================
 
+Subpackages
+-----------
+
+.. toctree::
+   :maxdepth: 4
+
+   services.apis
+
 Submodules
 ----------
 

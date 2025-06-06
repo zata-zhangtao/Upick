@@ -91,7 +91,7 @@ python run.py
 2. 如果配置文件yaml中想要设置为None，直接空着就行，如果填None反而是字符串的'None'
 3. 通过如下命令创建并打开api文档 (linux/mac)
     ```bash
-    cd docs/
-    make html 
+    cd docs/ 
+    make html    # 根据生成使用：sphinx-apidoc -f -o ./source ../src
     open build/html/index.html
     ```
