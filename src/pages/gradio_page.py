@@ -185,7 +185,7 @@ def create_ui():
                     html = "<div class='updates-container'>"
                     for update in updates_data:
                         if isinstance(update, (list, tuple)) and len(update) >= 3:
-                            url = update[0]
+                            title = update[0]
                             updated_at = update[1]
                             try:
                                 changes = json.loads(update[2]) if isinstance(update[2], (str, bytes, bytearray)) else {}
@@ -219,7 +219,7 @@ def create_ui():
                             html += f"""
                             <div class='card'>
                                 <div class='card-header'>
-                                    <a href="{url}" target="_blank" title="Visit original page">{url}</a>
+                                    <a href="{title}" target="_blank" title="Visit original page">{title}</a>
                                     <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" viewBox="0 0 16 16" style="display: inline-block; vertical-align: middle; margin-left: 5px;">
                                         <path fill-rule="evenodd" d="M8.636 3.5a.5.5 0 0 0-.5-.5H1.5A1.5 1.5 0 0 0 0 4.5v10A1.5 1.5 0 0 0 1.5 16h10a1.5 1.5 0 0 0 1.5-1.5V7.864a.5.5 0 0 0-1 0V14.5a.5.5 0 0 1-.5.5h-10a.5.5 0 0 1-.5-.5v-10a.5.5 0 0 1 .5-.5h6.636a.5.5 0 0 0 .5-.5z"/>
                                         <path fill-rule="evenodd" d="M16 .5a.5.5 0 0 0-.5-.5h-5a.5.5 0 0 0 0 1h3.793L6.146 9.146a.5.5 0 1 0 .708.708L15 1.707V5.5a.5.5 0 0 0 1 0v-5z"/>
@@ -276,6 +276,8 @@ def create_ui():
                                 except (ValueError, TypeError):
                                     continue
                         updates_data = filtered_updates
+
+
                     
                     # Update dropdown options for feedback
                     update_options = []

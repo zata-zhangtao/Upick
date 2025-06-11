@@ -7,8 +7,6 @@
 
 ### bug
 
-- 卡片的左上角url有问题
-  ![url问题](images/DevProcess/image.png)
 
 - ai生成了很多无效url，需要修复
   ![无效url问题](images/DevProcess/image-1.png)
@@ -56,6 +54,13 @@
 
 
 ## 更新记录
+
+
+### v1.2.1 
+
+fix: 
+  1. 内容卡片左上角标题网址url错误的问题 
+
 
 ### v1.2.0  2025.05.18
 
