@@ -13,3 +13,4 @@ releases/Upick/logs/
 *.DS_Store
 resources/learning_data
 docs/build/
+docs/logs/
