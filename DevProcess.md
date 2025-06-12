@@ -8,8 +8,6 @@
 ### bug
 
 
-- ai生成了很多无效url，需要修复
-  ![无效url问题](images/DevProcess/image-1.png)
 
 - 定时器过一段时间就失效了
   ![定时器失败](images/DevProcess/image-6.png)
@@ -26,7 +24,9 @@
 - 更新的时候是顺序执行的，太慢了，可以用异步操作
   ![优化更新速度](images/DevProcess/image-3.png)
 
+- 虽然通过提示词的方式阻止ai生成无效url了，但是感觉这种方式不是很优雅，而且会存在直接没有url的问题
 
+- 使用langgraph替代一下现有的
 
 ### 功能
 
@@ -63,7 +63,9 @@ add：
   1. 增加research功能
   2. 增加TTS功能
 fix: 
-  1. 内容卡片左上角标题网址url错误的问题 
+  1. 内容卡片左上角标题网址url错误的问题
+  2. 通过提示词阻止ai生成无效url
+
 
 
 ### v1.2.0  2025.05.18
